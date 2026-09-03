@@ -1,0 +1,259 @@
+/* Final visual pass: proportional type and calm, uncluttered kiosk screens. */
+.figma-canvas { container-type: inline-size; }
+.figma-date { font-size: .94cqw; }
+.back-arrow { width: 2.6cqw; height: 2.6cqw; font-size: 1.1cqw; }
+
+.brand strong { font-size: 2.1cqw; letter-spacing: .38cqw; }
+.brand i { width: 8.33cqw; margin: .52cqw 0; }
+.brand small { font-size: .5cqw; letter-spacing: .26cqw; }
+
+.screen-heading { top: 13%; }
+.screen-heading h1 { font-size: 3cqw; letter-spacing: .24cqw; }
+.screen-heading p { margin-top: .63cqw; max-width: 35.4cqw; font-size: 1.15cqw; }
+.screen-heading > i { width: 10.42cqw; margin-top: .89cqw; }
+.figma-button { min-width: 13.54cqw; padding: .94cqw 1.67cqw; font-size: 1.3cqw; }
+.minor-link, .skip-link { font-size: 1cqw; }
+
+.welcome-content p { font-size: 1.15cqw; }
+.welcome-content strong { margin-top: .26cqw; font-size: 2.71cqw; }
+.welcome-content > span { margin-top: .73cqw; font-size: .84cqw; }
+.welcome-content > span:before { top: -.68cqw; width: 2.61cqw; }
+.welcome-content h1 { margin-top: 3.59cqw; font-size: 2.92cqw; }
+.welcome-content small { font-size: .94cqw; }
+.tap-icon { width: 3.125cqw; height: 3.125cqw; margin-top: 3.07cqw; }
+.tap-icon img:last-child { inset: .83cqw; width: 1.46cqw; height: 1.46cqw; }
+
+.language-screen .screen-heading h1 { font-size: 2.34cqw; }
+.language-screen .screen-heading > i { margin-top: 1.04cqw; }
+.language-cards button { height: 11.46cqw; font-size: 1.67cqw; }
+
+.arrival-screen .location { font-size: 1.3cqw; }
+.title-line { width: 8.33cqw; }
+.prompt { font-size: 1.05cqw; }
+.arrival-cards > b { font-size: 1.3cqw; }
+.arrival-cards h2 { font-size: 1.82cqw; }
+.arrival-cards p, .arrival-cards span { font-size: 1.3cqw; }
+.arrival-cards span { padding: .78cqw 0; }
+
+.reservation-screen .screen-heading { top: 18%; }
+.confirmation-screen .screen-heading { top: 19%; }
+/* Leave a deliberate gap below the reservation instruction: it no longer
+   collides with the two lookup panels at compact desktop sizes. */
+.lookup-grid { top: 42.25%; }
+.lookup-card { height: 15.63cqw; padding: 2.35cqw 2.86cqw; }
+.lookup-card label { font-size: .83cqw; line-height: 1.25; }
+.lookup-card input { margin: .73cqw 0 1.51cqw; padding: .52cqw 0; font-size: 1.35cqw; line-height: 1.2; }
+.lookup-card .figma-button { display: block; min-width: 11.98cqw; margin: 0 auto; padding: .68cqw 1.2cqw; }
+.qr-card { height: 15.63cqw; gap: .42cqw; }
+.qr-card span { font-size: 4.17cqw; }.qr-card strong { font-size: 1.3cqw; }.qr-card small { font-size: .78cqw; }
+.scan-screen .scanner { width: 17.19cqw; height: 13.02cqw; }.scanner span { font-size: 7.29cqw; }.scan-screen > p { font-size: 1.04cqw; }
+.success-mark, .error-mark { width: 3.85cqw; height: 3.85cqw; font-size: 2.08cqw; }
+.confirmation-card { min-height: 9.79cqw; padding: 1.72cqw 7%; align-items: center; }.confirmation-card small { font-size: .68cqw; line-height: 1.2; }.confirmation-card strong { margin: .52cqw 0 .31cqw; font-size: 1.46cqw; line-height: 1.16; }.confirmation-card p { font-size: .78cqw; line-height: 1.35; }
+.count-question { font-size: 1.3cqw; }.number-pills { gap: 1.04cqw; }.number-pills button { width: 4.17cqw; height: 3.39cqw; font-size: 1.3cqw; }.mail-choice { font-size: .84cqw; }
+
+.upgrade-screen .screen-heading, .services-screen .screen-heading { top: 13%; }
+/* The suite cards are separated from the subtitle and use one compact text
+   scale so all three cards stay visually level. */
+.upgrade-screen .suite-grid { top: 35%; }
+.suite-grid article { height: 20.31cqw; }.suite-image { height: 10.16cqw; }.suite-image span { margin: .47cqw .68cqw; padding: .31cqw .57cqw; font-size: .52cqw; }.suite-grid h2 { margin: .78cqw 1.46cqw .26cqw; font-size: 1.25cqw; line-height: 1.12; }.suite-grid p { margin: 0 1.46cqw .52cqw; font-size: .73cqw; line-height: 1.3; }.suite-grid strong { margin-left: 1.46cqw; font-size: .89cqw; }.suite-grid .figma-button { right: 1.15cqw; bottom: 1.04cqw; min-width: 6.1cqw; padding: .42cqw .63cqw; font-size: .68cqw; }
+.service-grid button { min-height: 7.81cqw; padding: 1.35cqw 2.08cqw; }.service-grid span { width: 2.29cqw; font-size: 1.77cqw; }.service-grid strong { margin: .26cqw 0; font-size: 1.15cqw; }.service-grid small, .service-grid i { font-size: .78cqw; }.service-grid i { right: 1.3cqw; }
+.basket-list { padding: .63cqw 1.56cqw; }.basket-list div { gap: 1.25cqw; padding: .99cqw 0; font-size: 1.04cqw; }.basket-list button { font-size: .73cqw; }.basket-total { font-size: 1.25cqw; }
+.recap-grid article { height: 8.44cqw; padding: 1.41cqw 2.08cqw; }.recap-grid span { margin-right: 1.3cqw; font-size: 1.98cqw; }.recap-grid h2 { font-size: 1.2cqw; }.recap-grid p { font-size: .78cqw; }.map-card { padding: 1.2cqw 1.77cqw; }.map-card strong { font-size: 1.15cqw; }.map-card p { font-size: .73cqw; }
+.tax-card { padding: 1.77cqw 2.08cqw; }.tax-card small { font-size: .63cqw; }.tax-card strong { margin: .57cqw 0 .26cqw; font-size: 1.41cqw; }.tax-card p { font-size: .83cqw; }.tax-card > b { font-size: 1.3cqw; }
+.payment-choices button, .departure-grid button { height: 13.54cqw; }.payment-choices span, .departure-grid span { margin-bottom: .94cqw; font-size: 2.71cqw; }.payment-choices strong, .departure-grid strong { font-size: 1.35cqw; }.payment-choices small, .departure-grid small { margin-top: .52cqw; font-size: .78cqw; }.amount { font-size: 1.04cqw; }.amount strong { font-size: 1.35cqw; }
+.machine-screen .terminal-device { width: 15.63cqw; height: 10.94cqw; }.terminal-device span { font-size: 3.65cqw; }.terminal-device p { font-size: .83cqw; }
+.success-mark.large { width: 4.79cqw; height: 4.79cqw; font-size: 2.5cqw; }.cash-screen .reference { padding: 1.56cqw 3.65cqw; font-size: 1.88cqw; }.reference small { margin-top: .63cqw; font-size: .89cqw; }.printer { width: 13.02cqw; height: 8.85cqw; padding: 1.3cqw; }.printer i { height: .94cqw; margin: .63cqw; }
+.key-stack { transform: translateX(-50%) scale(.92); transform-origin: top center; }.late-price { width: 17.19cqw; padding: 1.72cqw; }.late-price strong { font-size: 1.98cqw; }.late-price span { font-size: .83cqw; }.taxi-info label { padding: 1.04cqw 1.46cqw; font-size: .78cqw; }.taxi-info select, .taxi-info label button { margin-top: .52cqw; font-size: 1.2cqw; }.time-display { font-size: 2.81cqw; }.time-grid { width: 26.04cqw; gap: .68cqw; }.time-grid button { height: 2.92cqw; font-size: .94cqw; }.backoffice-grid article { min-height: 9.38cqw; padding: 1.56cqw; }.backoffice-grid small { font-size: .63cqw; }.backoffice-grid strong { margin-top: 1.3cqw; font-size: 2.71cqw; }
+
+@media (max-width: 900px) {
+  .figma-button { min-width: 13.54cqw; padding: .94cqw 1.67cqw; border-radius: .52cqw; }
+  .language-cards button { height: 11.46cqw; border-radius: .52cqw; }
+  .lookup-card, .qr-card { height: 15.63cqw; }.lookup-card { padding: 2.86cqw; }
+  .scan-screen .scanner { width: 17.19cqw; height: 13.02cqw; }
+  .suite-grid article { height: 20.83cqw; }.suite-image { height: 10.42cqw; }
+  .service-grid button { min-height: 7.81cqw; }.payment-choices button, .departure-grid button { height: 13.54cqw; }
+  .machine-screen .terminal-device { width: 15.63cqw; height: 10.94cqw; }.key-stack { transform: translateX(-50%) scale(.92); }
+}
+
+/* Five-screen alignment pass: stable touch targets and one shared spacing grid. */
+.figma-button {
+  display: inline-grid;
+  place-items: center;
+  min-height: 3.65cqw;
+  line-height: 1;
+  transform-origin: center;
+  transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.figma-button:disabled {
+  cursor: not-allowed;
+  background: #d8d2c8;
+  border-color: #c8c0b3;
+  color: #8d857a;
+  box-shadow: none;
+}
+.figma-button:disabled:hover { transform: none; }
+
+/* 1. Card count */
+.confirmation-screen .number-pills {
+  top: 63.5%;
+  align-items: center;
+}
+.number-pills button {
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.confirmation-continue {
+  position: absolute;
+  top: 73%;
+  left: 50%;
+  translate: -50% 0;
+}
+.confirmation-screen .mail-choice {
+  bottom: 8.5%;
+  left: 12%;
+  padding: .45cqw;
+  line-height: 1.2;
+}
+
+/* 2. Upgrade: fixed card rhythm, feedback on selection and direct basket access. */
+.upgrade-screen .suite-grid { top: 34.5%; }
+.suite-grid .figma-button.added {
+  background: #6f876c;
+  border-color: #6f876c;
+}
+.upgrade-screen .skip-link {
+  bottom: 18%;
+}
+.upgrade-continue {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  translate: -50% 0;
+}
+.upgrade-cart {
+  position: absolute;
+  right: 7.2%;
+  bottom: 10.5%;
+  display: grid;
+  place-items: center;
+  width: 3.5cqw;
+  height: 3.5cqw;
+  padding: 0;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--brown);
+  cursor: pointer;
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.upgrade-cart:hover { background: #f2eadd; box-shadow: 0 .35cqw 1cqw #8b735526; transform: scale(1.04); }
+.upgrade-cart svg { width: 1.45cqw; height: 1.45cqw; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.upgrade-cart span {
+  position: absolute;
+  top: -.42cqw;
+  right: -.42cqw;
+  display: grid;
+  place-items: center;
+  min-width: 1.3cqw;
+  height: 1.3cqw;
+  padding: 0 .2cqw;
+  border-radius: 1cqw;
+  background: var(--sand);
+  color: #fff;
+  font-size: .68cqw;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* 3. Services: exactly six equal cards — no seventh card can spill below the frame. */
+.services-screen .screen-heading { top: 11.5%; }
+.services-screen .service-grid {
+  top: 35%;
+  left: 14%;
+  width: 72%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.55cqw 9%;
+}
+.service-grid button {
+  min-height: 0;
+  height: 7.25cqw;
+  padding: 1.04cqw 1.72cqw;
+  overflow: hidden;
+  border-width: 1px;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.service-grid button.chosen { border-width: 1px; box-shadow: inset 0 0 0 1px var(--brown); }
+.service-grid button:hover { transform: scale(1.01); box-shadow: 0 .35cqw 1cqw #8b735520; }
+.service-grid span { width: 1.9cqw; font-size: 1.45cqw; line-height: 1; }
+.service-grid strong { margin: .15cqw 0; font-size: 1.04cqw; line-height: 1.2; }
+.service-grid small, .service-grid i { font-size: .68cqw; line-height: 1.2; }
+.service-grid i { right: 1.25cqw; }
+.services-screen > .figma-button { bottom: 10%; }
+
+/* 4. Basket: a quantity never affects a row or image footprint. */
+.basket-screen .screen-heading { top: 12%; }
+.basket-screen .basket-list {
+  top: 39%;
+  left: 24%;
+  width: 52%;
+  max-height: 18cqw;
+  padding: .55cqw 1.56cqw;
+  overflow: auto;
+}
+.basket-list div {
+  min-height: 3.15cqw;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 1.25cqw;
+  padding: .72cqw 0;
+  line-height: 1.2;
+}
+.basket-list div > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.basket-list img, .basket-list [data-product-image] {
+  width: 2.5cqw;
+  height: 2.5cqw;
+  max-width: 2.5cqw;
+  max-height: 2.5cqw;
+  flex: 0 0 2.5cqw;
+  object-fit: cover;
+}
+.basket-total { top: 66%; }
+.basket-screen > .figma-button { bottom: 10%; }
+
+/* 5. Stay recap: aligned two-column cards, then information panel and action. */
+.recap-screen .screen-heading { top: 11.5%; }
+.recap-screen .recap-grid {
+  top: 35%;
+  left: 11.2%;
+  width: 77.6%;
+  gap: 2.1cqw 8%;
+}
+.recap-grid article {
+  display: grid;
+  grid-template-columns: 2.2cqw minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
+  height: 7.6cqw;
+  padding: 1.15cqw 1.72cqw;
+  overflow: hidden;
+}
+.recap-grid span {
+  float: none;
+  grid-row: 1 / span 2;
+  margin: 0;
+  align-self: start;
+  font-size: 1.56cqw;
+  line-height: 1.1;
+}
+.recap-grid h2 { margin: 0 0 .26cqw; font-size: 1.04cqw; line-height: 1.15; }
+.recap-grid p { font-size: .68cqw; line-height: 1.3; }
+.recap-screen .map-card {
+  top: 69%;
+  bottom: auto;
+  min-height: 7.5cqw;
+  padding: 1.15cqw 1.72cqw;
+}
+.recap-screen .map-card strong { font-size: 1.04cqw; line-height: 1.2; }
+.recap-screen .map-card p { margin-top: .32cqw; font-size: .68cqw; line-height: 1.3; }
+.recap-screen > .figma-button { bottom: 9%; }
