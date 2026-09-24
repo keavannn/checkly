@@ -225,7 +225,7 @@ export default function DashboardCuisine() {
         .catch(() => { if (!cancelled) setReservationsError(true); });
     };
     fetchArrivals();
-    const interval = setInterval(fetchArrivals, 60000);
+    const interval = setInterval(fetchArrivals, 15000);
     return () => { cancelled = true; clearInterval(interval); };
   }, []);
   const [view, setView] = useState<"cuisine" | "reception" | "chambres" | "stats" | "chat" | "historique">("cuisine");

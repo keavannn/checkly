@@ -92,6 +92,7 @@ export default function Kiosk() {
   const orderedRef = useRef(false);
   const [pmsReservation, setPmsReservation] = useState<ApaleoReservation | null>(null);
   const [pmsSearching, setPmsSearching] = useState(false);
+  const [pmsCheckin, setPmsCheckin] = useState<"idle" | "done" | "failed">("idle");
   const go = (id: ScreenId) => {
     setHistory((current) => [...current, screen]);
     setScreen(id);
@@ -156,6 +157,7 @@ export default function Kiosk() {
     setReservation("");
     setForceNotReady(false);
     setPmsReservation(null);
+    setPmsCheckin("idle");
   };
   const resetJourney = () => {
     clearRoomOrders(config.room);
@@ -172,6 +174,11 @@ export default function Kiosk() {
   useEffect(() => {
     if (screen !== "print" || orderedRef.current) return;
     orderedRef.current = true;
+    if (pmsReservation) {
+      fetch("/api/pms/checkin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: pmsReservation.id }) })
+        .then((res) => setPmsCheckin(res.ok ? "done" : "failed"))
+        .catch(() => setPmsCheckin("failed"));
+    }
     basketLines.forEach((line) => {
       addOrder([{ nom: line.nom, emoji: "◆", qty: 1, prix: line.total }], line.total, "sejour", "livre", true);
     });
@@ -299,7 +306,7 @@ export default function Kiosk() {
       case "cash": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="cash-screen"><Heading title={t.cashPaymentTitle} intro={t.cashPaymentIntro}/><div className="reference">CHEEKLY-0622<br/><small>{formatPrice(total + taxTotal, currency)}</small></div><Button onClick={() => go("print")}>{t.paymentConfirmedFrontDesk}</Button></section></Frame>;
       case "print": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="machine-screen"><Heading title={t.preparingCardsTitle} intro={t.preparingCardsIntro(cardCount ?? 1)}/><motion.div className="printer" animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.3 }}><i/><i/><i/></motion.div><Button onClick={() => go("keys")}>{t.cardsReady}</Button></section></Frame>;
       case "keys": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="keys-screen"><Heading title={t.cardsReadyTitle} intro={t.cardsReadyIntro}/><div className="key-stack">{Array.from({ length: cardCount ?? 1 }).map((_, index) => <div key={index}><small>{config.hotelName.toUpperCase()}</small><strong>{config.room}</strong><span>{t.deluxeLakeView}</span></div>)}</div><Button onClick={() => go("final")}>{t.iCollectedMyCards}</Button></section></Frame>;
-      case "final": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="success-mark large">✓</span><Heading title={t.finalTitle(config.hotelName)} intro={t.finalIntro(config.city)} brand={false}/><Button onClick={() => go("welcome")}>{t.finish}</Button></section></Frame>;
+      case "final": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="success-mark large">✓</span><Heading title={t.finalTitle(config.hotelName)} intro={t.finalIntro(config.city)} brand={false}/>{pmsCheckin === "done" && <p className="pms-checkin-note">✓ {t.pmsCheckedIn}</p>}<Button onClick={() => go("welcome")}>{t.finish}</Button></section></Frame>;
       case "departure": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="departure-screen"><Heading title={t.departureTitle} intro={t.departureIntro}/><div className="departure-grid"><button onClick={() => go("taxi")}><span>▰</span><strong>{t.orderTaxi}</strong><small>{t.orderTaxiDesc}</small></button></div><Button onClick={() => go("departureRecap")}>{t.finalizeCheckout}</Button></section></Frame>;
       case "taxi": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="taxi-screen"><Heading title={t.taxiTitle} intro={t.taxiIntro}/><div className="taxi-info"><label>{t.destinationLabel}<select><option>{t.genevaAirport}</option><option>{t.lausanneStation}</option><option>{t.cityCenter}</option></select></label><label>{t.departureTimeLabel}<button onClick={() => go("time")}>{taxiTime} · {t.change}</button></label></div><Button onClick={() => go("taxiConfirm")}>{t.bookThisTaxi}</Button></section></Frame>;
       case "taxiConfirm": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><motion.span className="success-mark large" initial={{ scale: .6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: .35 }}>✓</motion.span><Heading title={t.taxiBookedTitle} intro={t.taxiBookedIntro(taxiTime)} brand={false}/></section></Frame>;

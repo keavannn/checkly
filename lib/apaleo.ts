@@ -1,5 +1,6 @@
 const TOKEN_URL = "https://identity.apaleo.com/connect/token";
 const API_BASE = "https://api.apaleo.com";
+const apaleoDate = (ms: number) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
 
 type ApaleoReservationRaw = {
   id: string;
@@ -8,6 +9,7 @@ type ApaleoReservationRaw = {
   unitGroup?: { name?: string };
   unit?: { name?: string };
   property?: { name?: string };
+  ratePlan?: { id: string };
   arrival: string;
   departure: string;
   adults: number;
@@ -15,6 +17,7 @@ type ApaleoReservationRaw = {
 };
 
 export type ApaleoReservation = {
+  id: string;
   guestFirstName: string;
   guestLastName: string;
   guestEmail: string;
@@ -72,11 +75,10 @@ export async function getUpcomingArrivals(): Promise<ApaleoArrival[]> {
   from.setDate(from.getDate() - 1);
   const to = new Date();
   to.setDate(to.getDate() + 3);
-  const toApaleoDate = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "Z");
   const params = new URLSearchParams({
     dateFilter: "Stay",
-    from: toApaleoDate(from),
-    to: toApaleoDate(to),
+    from: apaleoDate(from.getTime()),
+    to: apaleoDate(to.getTime()),
     pageSize: "20",
     sort: "arrival:asc",
     status: "Confirmed,InHouse,CheckedOut",
@@ -110,6 +112,7 @@ export async function findReservationByLastName(lastName: string): Promise<Apale
   const r = data.reservations?.[0];
   if (!r) return null;
   return {
+    id: r.id,
     guestFirstName: r.primaryGuest.firstName,
     guestLastName: r.primaryGuest.lastName,
     guestEmail: r.primaryGuest.email || "",
@@ -121,4 +124,57 @@ export async function findReservationByLastName(lastName: string): Promise<Apale
     totalAmount: r.totalGrossAmount?.amount ?? 0,
     currency: r.totalGrossAmount?.currency ?? "EUR",
   };
+}
+
+export type CheckInResult = { ok: boolean; message?: string };
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Check-in réel d'une réservation. Si l'arrivée prévue est dans le futur, on avance l'arrivée à maintenant (arrivée anticipée), comme le ferait un réceptionniste. */
+export async function checkInReservation(id: string): Promise<CheckInResult> {
+  const token = await getAccessToken();
+  const headers = { Authorization: `Bearer ${token}` };
+  const getRes = await fetch(`${API_BASE}/booking/v1/reservations/${id}`, { headers, signal: AbortSignal.timeout(8000), cache: "no-store" });
+  if (!getRes.ok) return { ok: false, message: "Réservation introuvable" };
+  const r = (await getRes.json()) as ApaleoReservationRaw;
+  if (r.status === "InHouse" || r.status === "CheckedOut") return { ok: true };
+  if (r.status !== "Confirmed") return { ok: false, message: `Statut ${r.status} : check-in impossible` };
+
+  if (Date.parse(r.arrival) > Date.now()) {
+    const newArrivalMs = Date.now() + 4000;
+    const offsetMatch = r.departure.match(/([+-])(\d{2}):(\d{2})$/);
+    const offsetMin = offsetMatch ? (offsetMatch[1] === "-" ? -1 : 1) * (Number(offsetMatch[2]) * 60 + Number(offsetMatch[3])) : 0;
+    const arrivalDay = new Date(newArrivalMs + offsetMin * 60000).toISOString().slice(0, 10);
+    const nights = Math.round((Date.parse(r.departure.slice(0, 10)) - Date.parse(arrivalDay)) / 86400000);
+    if (nights < 1 || !r.ratePlan) return { ok: false, message: "Arrivée anticipée impossible" };
+    const ratePlanId = r.ratePlan.id;
+    const amend = (sliceCount: number) => fetch(`${API_BASE}/booking/v1/reservation-actions/${id}/amend`, {
+      method: "PUT",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        arrival: apaleoDate(newArrivalMs),
+        departure: r.departure,
+        adults: r.adults,
+        requote: true,
+        timeSlices: Array.from({ length: sliceCount }, () => ({ ratePlanId })),
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+    let amendRes = await amend(nights);
+    if (!amendRes.ok) {
+      const detail = (await amendRes.json().catch(() => null)) as { messages?: string[] } | null;
+      // Avant le changement de jour hôtelier (ex. 3h du matin), Apaleo compte la nuit précédente : il indique le bon nombre de nuits.
+      const expected = Number(detail?.messages?.[0]?.match(/(\d+) time slices must be specified/)?.[1]);
+      if (expected > 0) amendRes = await amend(expected);
+      if (!amendRes.ok) return { ok: false, message: "Arrivée anticipée refusée" };
+    }
+    await wait(4500);
+  }
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await fetch(`${API_BASE}/booking/v1/reservation-actions/${id}/checkin`, { method: "PUT", headers, signal: AbortSignal.timeout(8000) });
+    if (res.ok) return { ok: true };
+    await wait(2000);
+  }
+  return { ok: false, message: "Check-in refusé par le système hôtelier" };
 }
