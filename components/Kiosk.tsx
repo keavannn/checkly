@@ -1,23 +1,38 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import "../app/kiosk-refinements.css";
+import { motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useConfig, wifiName, getCurrency } from "@/lib/config";
+import { getStayPeriod, languageOptions, pickTranslation, type Lang } from "@/lib/i18n";
+import { useOrders, addOrder, clearRoomOrders, getUnpaidBill } from "@/lib/orders";
+import { stayServices, suiteOptions, taxeSejour, computeServicePrice, unitPriceLabel, formatPrice, serviceName } from "@/lib/services";
+import { useWeather, weatherLabel } from "@/lib/weather";
+import { kioskCopy } from "@/lib/i18n/kiosk";
+import type { ApaleoReservation } from "@/lib/apaleo";
 
 type ScreenId =
   | "welcome" | "languages" | "arrival" | "reservation" | "scan"
-  | "confirmation" | "upgrade" | "services" | "basket" | "recap"
+  | "chambrePasPrete" | "confirmation" | "upgrade" | "services" | "basket" | "recap"
   | "tax" | "payment" | "paymentLoading" | "paymentAccepted" | "print"
-  | "keys" | "final" | "departure" | "late" | "taxi" | "time"
-  | "cash" | "paymentRefused" | "backOffice";
+  | "keys" | "final" | "departure" | "taxi" | "taxiConfirm" | "time"
+  | "cash" | "paymentRefused" | "backOffice"
+  | "departureRecap" | "departurePayment" | "departurePaymentLoading"
+  | "departurePaymentAccepted" | "departurePaymentRefused" | "departureCash";
 
-const cardServices = [
-  ["Petit déjeuner", "+35 CHF / nuit", "☕"], ["Accès spa", "+50 CHF / nuit", "✦"],
-  ["Champagne en chambre", "+80 CHF", "⌇"], ["Lit bébé", "GRATUIT", "⌂"],
-  ["Late check-out 14h", "+40 CHF", "◷"], ["Parking", "+30 CHF / nuit", "▣"],
-  ["Transfert aéroport retour", "+90 CHF / nuit", "↗"],
-];
+const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+function today() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm} - ${dayNames[now.getDay()]} ${now.getDate()} ${monthNames[now.getMonth()]}`;
+}
 
-function today() { return "14:32 - Lun 22 Juin"; }
+function floorLabel(lang: Lang, floor: number): string {
+  const words: Record<Lang, string> = { fr: "Étage", en: "Floor", es: "Planta", de: "Etage", it: "Piano", ar: "الطابق" };
+  return `${words[lang]} ${floor}`;
+}
 
 function Brand() {
   return <div className="brand" aria-label="Checkly Hotel Technology">
@@ -37,39 +52,199 @@ function CartIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 1.9-1.4L21 8H7"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>;
 }
 
-function Frame({ children, onBack, canGoBack }: { children: React.ReactNode; onBack: () => void; canGoBack: boolean }) {
+function CashIcon() {
+  return <svg className="icon-cash" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M5.5 9h.01M18.5 15h.01"/></svg>;
+}
+
+function Frame({ children, onBack, canGoBack, autoCursor }: { children: React.ReactNode; onBack: () => void; canGoBack: boolean; autoCursor?: { x: number; y: number; clicking: boolean } | null }) {
   return <div className="canvas-shell">
     <div className="figma-canvas">
       <div className="figma-card" />
       <time className="figma-date">{today()}</time>
       {canGoBack && <motion.button className="back-arrow" aria-label="Retour à l'écran précédent" onClick={onBack} whileHover={{ scale: 1.06 }} whileTap={{ scale: .94 }}>←</motion.button>}
       {children}
+      {autoCursor && <div className={`auto-cursor${autoCursor.clicking ? " clicking" : ""}`} style={{ left: `${autoCursor.x}%`, top: `${autoCursor.y}%` }} />}
     </div>
   </div>;
 }
 
+const ROOM_BASE_TOTAL = 1180;
+
 export default function Kiosk() {
+  const config = useConfig();
+  const currency = getCurrency(config.country);
+  const { orders } = useOrders();
+  const [lang, setLang] = useState<Lang>("fr");
+  const t = kioskCopy[lang];
+  const stay = getStayPeriod(3, lang);
+  const ctx = useMemo(() => ({ nights: stay.nights, guests: config.guests, currency }), [stay.nights, config.guests, currency]);
+  const weather = useWeather(config.city);
   const [screen, setScreen] = useState<ScreenId>("welcome");
   const [history, setHistory] = useState<ScreenId[]>([]);
-  const [services, setServices] = useState<string[]>(["Petit déjeuner", "Champagne en chambre"]);
-  const [cardCount, setCardCount] = useState<number | null>(null);
+  const [selectedServices, setSelectedServices] = useState<Record<string, number>>({});
+  const [cardCount, setCardCount] = useState<number | null>(config.guests);
   const [selectedUpgrade, setSelectedUpgrade] = useState<string | null>(null);
   const [taxiTime, setTaxiTime] = useState("10:30");
   const [reservation, setReservation] = useState("");
+  const [autoPick, setAutoPick] = useState<string | null>(null);
+  const [forceNotReady, setForceNotReady] = useState(false);
+  const roomIsReady = !forceNotReady;
+  const orderedRef = useRef(false);
+  const [pmsReservation, setPmsReservation] = useState<ApaleoReservation | null>(null);
+  const [pmsSearching, setPmsSearching] = useState(false);
   const go = (id: ScreenId) => {
     setHistory((current) => [...current, screen]);
     setScreen(id);
+    setAutoPick(null);
   };
   const goBack = () => {
     if (history.length === 0) return;
     setScreen(history[history.length - 1]);
     setHistory((current) => current.slice(0, -1));
   };
-  const toggleService = (name: string) => setServices((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name]);
-  const basketItems = selectedUpgrade ? [selectedUpgrade, ...services] : services;
-  const itemPrice = (item: string) => item === "Suite Junior" ? 267 : item === "Suite Prestige" ? 567 : item === "Suite Royale" ? 960 : item === "Petit déjeuner" ? 70 : item === "Champagne en chambre" ? 80 : 40;
-  const removeBasketItem = (item: string) => item === selectedUpgrade ? setSelectedUpgrade(null) : toggleService(item);
-  const total = useMemo(() => 1180 + basketItems.reduce((sum, item) => sum + itemPrice(item), 0), [basketItems]);
+  const goToConfirmation = async () => {
+    setPmsSearching(true);
+    try {
+      const res = await fetch("/api/pms/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lastName: reservation }),
+      });
+      const data = await res.json();
+      setPmsReservation(data.found ? data.reservation : null);
+    } catch {
+      setPmsReservation(null);
+    } finally {
+      setPmsSearching(false);
+    }
+    go(roomIsReady ? "confirmation" : "chambrePasPrete");
+  };
+  const setServiceQty = (id: string, qty: number, maxQty = 1) => setSelectedServices((current) => ({ ...current, [id]: Math.max(0, Math.min(maxQty, qty)) }));
+  const toggleService = (id: string) => setServiceQty(id, selectedServices[id] ? 0 : 1);
+
+  const basketLines = useMemo(() => {
+    const lines: Array<{ id: string; nom: string; unitLabel: string; detailLabel: string; total: number }> = [];
+    if (selectedUpgrade) {
+      const suite = suiteOptions.find((s) => s.id === selectedUpgrade);
+      if (suite) {
+        const svc = { id: suite.id, nom: suite.nom, icone: "", prix: suite.prix, pricingType: suite.pricingType };
+        const { total, detailLabel } = computeServicePrice(svc, ctx, 1, lang);
+        lines.push({ id: suite.id, nom: suite.nom, unitLabel: unitPriceLabel(svc, currency, lang), detailLabel, total });
+      }
+    }
+    stayServices.forEach((service) => {
+      const qty = selectedServices[service.id] ?? 0;
+      if (qty <= 0) return;
+      const { total, detailLabel } = computeServicePrice(service, ctx, qty, lang);
+      lines.push({ id: service.id, nom: serviceName(service, lang), unitLabel: unitPriceLabel(service, currency, lang), detailLabel, total });
+    });
+    return lines;
+  }, [selectedUpgrade, selectedServices, ctx, currency, lang]);
+  const basketItemCount = basketLines.length;
+  const removeBasketItem = (id: string) => id === selectedUpgrade ? setSelectedUpgrade(null) : setServiceQty(id, 0);
+  const servicesTotal = useMemo(() => basketLines.reduce((sum, line) => sum + line.total, 0), [basketLines]);
+  const total = ROOM_BASE_TOTAL + servicesTotal;
+  const taxResult = useMemo(() => computeServicePrice(taxeSejour, ctx, 1, lang), [ctx, lang]);
+  const taxTotal = taxResult.total;
+  const stayBill = useMemo(() => getUnpaidBill(orders, config.room), [orders, config.room]);
+
+  const resetSelections = () => {
+    orderedRef.current = false;
+    setSelectedServices({});
+    setSelectedUpgrade(null);
+    setCardCount(config.guests);
+    setReservation("");
+    setForceNotReady(false);
+    setPmsReservation(null);
+  };
+  const resetJourney = () => {
+    clearRoomOrders(config.room);
+    resetSelections();
+  };
+
+  useEffect(() => {
+    if (screen !== "taxiConfirm") return;
+    const t = setTimeout(() => go("departurePayment"), 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
+
+  useEffect(() => {
+    if (screen !== "print" || orderedRef.current) return;
+    orderedRef.current = true;
+    basketLines.forEach((line) => {
+      addOrder([{ nom: line.nom, emoji: "◆", qty: 1, prix: line.total }], line.total, "sejour", "livre", true);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
+
+  const [autoDemoMode, setAutoDemoMode] = useState<"in" | "out" | null>(null);
+  const [autoCursor, setAutoCursor] = useState<{ x: number; y: number; clicking: boolean } | null>(null);
+  const autoStepIndex = useRef(0);
+  useEffect(() => {
+    if (!autoDemoMode) return;
+    let cancelled = false;
+    const checkinSteps: Array<{ x: number; y: number; action: () => void }> = [
+      { x: 50, y: 68, action: () => go("languages") },
+      { x: 24, y: 44, action: () => go("arrival") },
+      { x: 28, y: 62, action: () => go("reservation") },
+      { x: 30, y: 46, action: () => setReservation(config.guestLast.toUpperCase()) },
+      { x: 30, y: 58, action: () => go("confirmation") },
+      { x: 46, y: 64, action: () => { setCardCount(config.guests); setAutoPick(`card-${config.guests}`); } },
+      { x: 50, y: 73, action: () => go("upgrade") },
+      { x: 27, y: 64, action: () => { setSelectedUpgrade("suite-junior"); setAutoPick("upgrade-suite-junior"); } },
+      { x: 50, y: 90, action: () => go("services") },
+      { x: 70, y: 41, action: () => { toggleService("spa"); setAutoPick("service-spa"); } },
+      { x: 50, y: 90, action: () => go("basket") },
+      { x: 50, y: 90, action: () => go("recap") },
+      { x: 50, y: 91, action: () => go("tax") },
+      { x: 50, y: 88, action: () => go("payment") },
+      { x: 36, y: 50, action: () => go("paymentLoading") },
+      { x: 50, y: 72, action: () => go("paymentAccepted") },
+      { x: 50, y: 72, action: () => go("print") },
+      { x: 50, y: 72, action: () => go("keys") },
+      { x: 50, y: 88, action: () => go("final") },
+    ];
+    const checkoutSteps: Array<{ x: number; y: number; action: () => void }> = [
+      { x: 50, y: 68, action: () => go("languages") },
+      { x: 24, y: 44, action: () => go("arrival") },
+      { x: 72, y: 62, action: () => go("departure") },
+      { x: 50, y: 90, action: () => go("departureRecap") },
+      { x: 50, y: 90, action: () => go("departurePayment") },
+      { x: 36, y: 50, action: () => go("departurePaymentLoading") },
+      { x: 50, y: 72, action: () => go("departurePaymentAccepted") },
+      { x: 50, y: 72, action: () => go("welcome") },
+    ];
+    const steps = autoDemoMode === "in" ? checkinSteps : checkoutSteps;
+    const runStep = () => {
+      if (cancelled) return;
+      if (autoStepIndex.current >= steps.length) {
+        autoStepIndex.current = 0;
+        setAutoCursor(null);
+        resetJourney();
+        setTimeout(runStep, 4500);
+        return;
+      }
+      const step = steps[autoStepIndex.current];
+      setAutoCursor({ x: step.x, y: step.y, clicking: false });
+      const t1 = setTimeout(() => {
+        if (cancelled) return;
+        setAutoCursor({ x: step.x, y: step.y, clicking: true });
+        const t2 = setTimeout(() => {
+          if (cancelled) return;
+          step.action();
+          autoStepIndex.current += 1;
+          setTimeout(runStep, 1900);
+        }, 350);
+        return () => clearTimeout(t2);
+      }, 1100);
+      return () => clearTimeout(t1);
+    };
+    autoStepIndex.current = 0;
+    const t = setTimeout(runStep, 700);
+    return () => { cancelled = true; clearTimeout(t); setAutoCursor(null); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoDemoMode]);
 
   useEffect(() => {
     const handleArrow = (event: KeyboardEvent) => {
@@ -81,34 +256,70 @@ export default function Kiosk() {
 
   const content = (() => {
     switch (screen) {
-      case "welcome": return <Frame onBack={goBack} canGoBack={history.length > 0}><button className="welcome-screen" onClick={() => go("languages")}>
-        <div className="welcome-content"><p>Royal Savoy</p><strong>CHECKLY</strong><span>LAUSANNE · SWITZERLAND</span><h1>Bienvenue</h1><small>Appuyez pour commencer</small><motion.span animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.6 }} className="tap-icon"><img src="/figma/welcome-tap.svg" alt=""/><img src="/figma/welcome-hand.svg" alt="Touchez pour commencer"/></motion.span></div>
+      case "welcome": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><button className="welcome-screen" onClick={() => { resetSelections(); go("languages"); }}>
+        <div className="welcome-content"><p>{config.hotelName}</p><strong>CHECKLY</strong><span>{config.city.toUpperCase()} · {config.country.toUpperCase()}</span>{weather && <span className="welcome-weather">{weatherLabel(weather.code, lang).icon} {weather.tempC}° · {weatherLabel(weather.code, lang).text}</span>}<h1>{t.welcomeTitle}</h1><small>{t.welcomeSubtitle}</small><motion.span animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.6 }} className="tap-icon"><img src="/figma/welcome-tap.svg" alt=""/><img src="/figma/welcome-hand.svg" alt={t.welcomeTapAlt}/></motion.span></div>
       </button></Frame>;
-      case "languages": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="language-screen"><Heading title="Sélectionnez votre langue" brand={false}/><div className="language-cards">{["Français", "English", "Español", "Deutsch", "Italiano", "العربية"].map((language, index) => <button key={language} className={index === 0 ? "active" : ""} onClick={() => go("arrival")}>{language}</button>)}</div></section></Frame>;
-      case "arrival": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="arrival-screen"><Brand/><p className="location">Lausanne - Switzerland</p><i className="title-line"/><p className="prompt">Comment puis-je vous aider ?</p><div className="arrival-cards"><button className="check-in" onClick={() => go("reservation")}><h2>Check-in</h2><p>J’arrive et je souhaite<br/>accéder à ma chambre</p><span>Commencer</span></button><b>OU</b><button className="check-out" onClick={() => go("departure")}><h2>Check-out</h2><p>Je pars et je souhaite<br/>préparer mon départ</p><span>Commencer</span></button></div></section></Frame>;
-      case "reservation": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="reservation-screen"><Heading title="Retrouvez votre réservation" intro="Entrez votre nom de famille ou scannez votre QR code."/><div className="lookup-grid"><div className="lookup-card"><label>Nom de famille<input value={reservation} onChange={(event) => setReservation(event.target.value)} placeholder="DUBOIS"/></label><Button onClick={() => go("confirmation")}>Continuer</Button></div><b>OU</b><button className="qr-card" onClick={() => go("scan")}><span>⌗</span><strong>Scanner mon QR code</strong><small>Présentez le code reçu par e-mail</small></button></div></section></Frame>;
-      case "scan": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="scan-screen"><Heading title="Scannez votre QR code" intro="Positionnez le QR code face au lecteur de la borne."/><div className="scanner"><div className="scan-laser"/><span>⌗</span></div><p>Lecture automatique en cours…</p><Button onClick={() => go("confirmation")}>J&apos;ai scanné mon code</Button></section></Frame>;
-      case "confirmation": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="confirmation-screen"><span className="success-mark">✓</span><Heading title="Bonjour, Keavan" intro="22 juin - 25 juin • 3 nuits" brand={false}/><div className="confirmation-card"><div><small>CHAMBRE</small><strong>Deluxe Lake View</strong><p>Étage 4 · Vue lac</p></div><div><small>ARRIVÉE</small><strong>À partir de 15:00</strong><p>Votre chambre est prête</p></div><div><small>VOTRE CLÉ</small><strong>{cardCount ? `${cardCount} cartes` : "À sélectionner"}</strong><p>Retirez-les à la borne</p></div></div><p className="count-question">Combien de cartes souhaitez-vous ?</p><div className="number-pills">{[1,2,3,4].map((number) => <button className={cardCount === number ? "selected" : ""} onClick={() => setCardCount(number)} key={number}>{number}</button>)}</div><Button className="confirmation-continue" disabled={!cardCount} onClick={() => go("upgrade")}>Continuer</Button><button className="mail-choice" onClick={() => go("upgrade")}>✉&nbsp; Recevoir ma clé digitale par email</button></section></Frame>;
-      case "upgrade": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="upgrade-screen"><Heading title="Améliorez votre séjour" intro="Des suites sont disponibles pour votre séjour du 22 au 25 juin."/><div className="suite-grid">{[["Suite Junior", "Vue lac · 45m² · Balcon", "+89 CHF / nuit"],["Suite Prestige", "Vue lac · 80m² · Terrasse", "+189 CHF / nuit"],["Suite Royale", "Vue panoramique · 120m²", "+320 CHF / nuit"]].map(([name, detail, price], index) => <article key={name} className={index === 0 ? "popular" : ""}><div className="suite-image">{index === 0 && <span>POPULAIRE</span>}</div><h2>{name}</h2><p>{detail}</p><strong>{price}</strong><motion.button className={`figma-button filled ${selectedUpgrade === name ? "added" : ""}`} whileHover={{ scale: 1.02 }} whileTap={{ scale: .98 }} animate={selectedUpgrade === name ? { scale: [1, 1.08, 1] } : { scale: 1 }} transition={{ duration: .32 }} onClick={() => setSelectedUpgrade(name)}>{selectedUpgrade === name ? "Ajouté ✓" : "Upgrader"}</motion.button></article>)}</div><button className="skip-link" onClick={() => go("services")}>Non merci, je garde ma chambre actuelle →</button><Button className="upgrade-continue" onClick={() => go("services")}>Continuer</Button><button className="upgrade-cart" aria-label={`Ouvrir le panier, ${basketItems.length} article${basketItems.length > 1 ? "s" : ""}`} onClick={() => go("basket")}><CartIcon/><span>{basketItems.length}</span></button></section></Frame>;
-      case "services": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="services-screen"><Heading title="Personnalisez votre séjour" intro="Ajoutez des services en un clic avant d’accéder à votre chambre."/><div className="service-grid">{cardServices.slice(0, 6).map(([name, price, icon]) => <button key={name} className={services.includes(name) ? "chosen" : ""} onClick={() => toggleService(name)}><span>{icon}</span><strong>{name}</strong><small>{price}</small><i>{services.includes(name) ? "Ajouté ✓" : "Ajouter +"}</i></button>)}</div><Button onClick={() => go("basket")}>Voir mon panier</Button></section></Frame>;
-      case "basket": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="basket-screen"><Heading title="Votre panier" intro="Vérifiez les services ajoutés à votre séjour."/><div className="basket-list">{basketItems.length === 0 ? <p>Aucun service sélectionné.</p> : basketItems.map((item) => <div key={item}><span>{item}</span><strong>{itemPrice(item)} CHF</strong><button onClick={() => removeBasketItem(item)}>Retirer</button></div>)}</div><div className="basket-total"><span>Total séjour</span><strong>CHF {total}.00</strong></div><Button onClick={() => go("recap")}>Continuer</Button></section></Frame>;
-      case "recap": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="recap-screen"><Heading title="Votre séjour" intro="Tout est prêt pour votre arrivée au Royal Savoy."/><div className="recap-grid"><article><span>⌂</span><h2>Chambre</h2><p>Deluxe Lake View<br/>Étage 4</p></article><article><span>▣</span><h2>Parking</h2><p>Place réservée<br/>Accès dès 14:00</p></article><article><span>⌁</span><h2>Services</h2><p>{basketItems.length} service(s)<br/>confirmé(s)</p></article><article><span>⌁</span><h2>Wi‑Fi</h2><p>RoyalSavoy-Guest<br/>Connexion offerte</p></article></div><div className="map-card"><strong>Votre chambre est prête.</strong><p>Récupérez vos cartes ci-dessous · Réception disponible 24h/24.</p></div><Button onClick={() => go("tax")}>Procéder au paiement</Button></section></Frame>;
-      case "tax": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="tax-screen"><Heading title="Taxe de séjour" intro="La taxe de séjour est obligatoire pour chaque nuit passée à Lausanne."/><div className="tax-card"><div><small>3 NUITS · 2 ADULTES</small><strong>Taxe de séjour</strong><p>CHF 3.50 par personne et par nuit</p></div><b>CHF 21.00</b></div><Button onClick={() => go("payment")}>Accepter et continuer</Button></section></Frame>;
-      case "payment": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="payment-screen"><Heading title="Paiement" intro="Choisissez votre moyen de règlement."/><div className="payment-choices"><button onClick={() => go("paymentLoading")}><span>▣</span><strong>Carte bancaire</strong><small>Sans contact, puce ou code PIN</small></button><button onClick={() => go("cash")}><span>₣</span><strong>Espèces</strong><small>Paiement auprès de la réception</small></button></div><p className="amount">Montant à régler <strong>CHF {total + 21}.00</strong></p></section></Frame>;
-      case "paymentLoading": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="machine-screen"><Heading title="Présentez votre carte" intro="Approchez ou insérez votre carte bancaire dans le terminal."/><motion.div className="terminal-device" animate={{ opacity: [1,.55,1] }} transition={{ repeat: Infinity, duration: 1.3 }}><span>◒</span><p>Terminal prêt</p></motion.div><Button onClick={() => go("paymentAccepted")}>Paiement effectué</Button><button className="minor-link" onClick={() => go("paymentRefused")}>Simuler un refus</button></section></Frame>;
-      case "paymentAccepted": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="result-screen"><span className="success-mark large">✓</span><Heading title="Paiement accepté" intro={`CHF ${total + 21}.00 ont été réglés avec succès.`} brand={false}/><Button onClick={() => go("print")}>Imprimer mes cartes</Button></section></Frame>;
-      case "paymentRefused": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="result-screen"><span className="error-mark">!</span><Heading title="Paiement refusé" intro="Votre carte n’a pas pu être débitée. Veuillez essayer une autre carte ou choisir les espèces." brand={false}/><Button onClick={() => go("payment")}>Réessayer</Button></section></Frame>;
-      case "cash": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="cash-screen"><Heading title="Paiement en espèces" intro="Présentez-vous à la réception avec cette référence pour régler votre séjour."/><div className="reference">CHEEKLY-0622<br/><small>CHF {total + 21}.00</small></div><Button onClick={() => go("print")}>Paiement validé par la réception</Button></section></Frame>;
-      case "print": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="machine-screen"><Heading title="Préparation de vos cartes" intro={`${cardCount ?? 1} carte(s) sont en cours d’impression. Retirez-les lorsqu’elles apparaissent.`}/><motion.div className="printer" animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.3 }}><i/><i/><i/></motion.div><Button onClick={() => go("keys")}>Mes cartes sont prêtes</Button></section></Frame>;
-      case "keys": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="keys-screen"><Heading title="Vos cartes sont prêtes" intro="Retirez-les maintenant dans le compartiment éclairé."/><div className="key-stack">{Array.from({ length: cardCount ?? 1 }).map((_, index) => <div key={index}><small>ROYAL SAVOY</small><strong>416</strong><span>DELUXE LAKE VIEW</span></div>)}</div><Button onClick={() => go("final")}>J&apos;ai récupéré mes cartes</Button></section></Frame>;
-      case "final": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="result-screen"><span className="success-mark large">✓</span><Heading title="Bienvenue au Royal Savoy" intro="Votre check-in est terminé. Nous vous souhaitons un merveilleux séjour à Lausanne." brand={false}/><Button onClick={() => go("welcome")}>Terminer</Button></section></Frame>;
-      case "departure": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="departure-screen"><Heading title="Préparez votre départ" intro="Comment pouvons-nous faciliter votre check-out ?"/><div className="departure-grid"><button onClick={() => go("late")}><span>◷</span><strong>Late check-out</strong><small>Gardez votre chambre jusqu’à 14:00</small></button><button onClick={() => go("taxi")}><span>▰</span><strong>Commander un taxi</strong><small>Planifiez votre transfert vers l’aéroport</small></button></div><Button onClick={() => go("payment")}>Finaliser mon check-out</Button></section></Frame>;
-      case "late": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="late-screen"><Heading title="Late check-out" intro="Profitez de votre chambre jusqu’à 14:00."/><div className="late-price"><strong>CHF 40.00</strong><span>supplément unique</span></div><Button onClick={() => go("payment")}>Ajouter à mon séjour</Button><button className="minor-link" onClick={() => go("departure")}>Non merci</button></section></Frame>;
-      case "taxi": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="taxi-screen"><Heading title="Commander un taxi" intro="Choisissez votre destination et l’heure de départ."/><div className="taxi-info"><label>Destination<select><option>Aéroport de Genève</option><option>Gare de Lausanne</option><option>Centre-ville</option></select></label><label>Heure de départ<button onClick={() => go("time")}>{taxiTime} · Modifier</button></label></div><Button onClick={() => go("payment")}>Réserver ce taxi</Button></section></Frame>;
-      case "time": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="time-screen"><Heading title="Choisissez votre heure" intro="Sélectionnez l’heure souhaitée pour votre taxi."/><div className="time-display">{taxiTime}</div><div className="time-grid">{["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00"].map((value) => <button className={taxiTime === value ? "selected" : ""} onClick={() => setTaxiTime(value)} key={value}>{value}</button>)}</div><Button onClick={() => go("taxi")}>Confirmer l’heure</Button></section></Frame>;
-      case "backOffice": return <Frame onBack={goBack} canGoBack={history.length > 0}><section className="backoffice-screen"><Heading title="Back Office" intro="Tableau de bord de la borne Checkly."/><div className="backoffice-grid"><article><small>CHECK-INS AUJOURD’HUI</small><strong>42</strong></article><article><small>CARTES IMPRIMÉES</small><strong>76</strong></article><article><small>PAIEMENTS EN ATTENTE</small><strong>3</strong></article><article><small>ASSISTANCE</small><strong>24/7</strong></article></div><Button onClick={() => go("welcome")}>Retour à la borne</Button></section></Frame>;
+      case "languages": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="language-screen"><Heading title={t.selectLanguage} brand={false}/><div className="language-cards">{languageOptions.map(({ code, label }) => <button key={code} className={lang === code ? "active" : ""} onClick={() => { setLang(code); go("arrival"); }}>{label}</button>)}</div></section></Frame>;
+      case "arrival": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="arrival-screen"><Brand/><p className="location">{config.city} - {config.country}</p><i className="title-line"/><p className="prompt">{t.howCanIHelp}</p><div className="arrival-cards"><button className="check-in" onClick={() => go("reservation")}><h2>{t.checkIn}</h2><p>{t.checkInDesc.split("\n")[0]}<br/>{t.checkInDesc.split("\n")[1]}</p><span>{t.start}</span></button><b>{t.or}</b><button className="check-out" onClick={() => go("departure")}><h2>{t.checkOut}</h2><p>{t.checkOutDesc.split("\n")[0]}<br/>{t.checkOutDesc.split("\n")[1]}</p><span>{t.start}</span></button></div></section></Frame>;
+      case "reservation": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="reservation-screen"><Heading title={t.findReservation} intro={t.findReservationIntro}/><div className="lookup-grid"><div className="lookup-card"><label>{t.lastName}<input value={reservation} onChange={(event) => setReservation(event.target.value)} placeholder="DUBOIS"/></label><Button disabled={pmsSearching} onClick={goToConfirmation}>{pmsSearching ? "…" : t.continueBtn}</Button></div><b>{t.or}</b><button className="qr-card" onClick={() => go("scan")}><span>⌗</span><strong>{t.scanMyQr}</strong><small>{t.scanMyQrDesc}</small></button></div></section></Frame>;
+      case "scan": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="scan-screen"><Heading title={t.scanQrTitle} intro={t.scanQrIntro}/><div className="scanner"><div className="scan-laser"/><span>⌗</span></div><p>{t.scanningInProgress}</p><Button onClick={goToConfirmation}>{t.iScannedMyCode}</Button></section></Frame>;
+      case "chambrePasPrete": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="wait-mark">◷</span><Heading title={t.roomNotReadyTitle} intro={t.roomNotReadyIntro} brand={false}/><Button onClick={() => go("confirmation")}>{t.continueAnyway}</Button></section></Frame>;
+      case "confirmation": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="confirmation-screen"><span className="success-mark">✓</span><Heading title={t.hello(pmsReservation ? `${pmsReservation.guestFirstName} ${pmsReservation.guestLastName}` : config.guestFirst)} intro={t.confirmationIntro(stay.short, stay.nights, config.guests)} brand={false}/><div className="confirmation-card"><div><small>{t.roomLabel}</small><strong>{pmsReservation?.roomName || "Deluxe Lake View"}</strong><p>{t.roomFloorView}</p>{pmsReservation && <p className="pms-tag">🔗 {pmsReservation.guestEmail || t.pmsConnected(pmsReservation.propertyName)}</p>}</div><div><small>{t.arrivalLabel}</small><strong>{t.arrivalFrom}</strong><p className={roomIsReady ? "room-status-ready" : "room-status-wait"}>{roomIsReady ? t.roomReady : t.roomNotReady}</p></div><div><small>{t.yourKeyLabel}</small><strong>{cardCount ? t.cardsCount(cardCount) : t.toSelect}</strong><p>{t.pickupAtKiosk}</p></div></div><p className="count-question">{t.howManyCards} <span className="count-hint">{t.preselectedHint(config.guests)}</span></p><div className="number-pills">{[1,2,3,4].map((number) => <button className={`${cardCount === number ? "selected" : ""} ${autoPick === `card-${number}` ? "auto-pick" : ""}`} onClick={() => setCardCount(number)} key={number}>{number}</button>)}</div><Button className="confirmation-continue" disabled={!cardCount} onClick={() => go("upgrade")}>{t.continueBtn}</Button></section></Frame>;
+      case "upgrade": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="upgrade-screen"><Heading title={t.upgradeTitle} intro={t.upgradeIntro(stay.range)}/><div className="suite-grid">{suiteOptions.map((suite, index) => { const svc = { id: suite.id, nom: suite.nom, icone: "", prix: suite.prix, pricingType: suite.pricingType }; return <article key={suite.id} className={index === 0 ? "popular" : ""}><div className="suite-image">{index === 0 && <span>{t.popular}</span>}</div><h2>{suite.nom}</h2><p>{pickTranslation(lang, suite.detail, { en: suite.detailEn, es: suite.detailEs, de: suite.detailDe, it: suite.detailIt, ar: suite.detailAr })}</p><strong>{unitPriceLabel(svc, currency, lang)}</strong><motion.button className={`figma-button filled ${selectedUpgrade === suite.id ? "added" : ""} ${autoPick === `upgrade-${suite.id}` ? "auto-pick" : ""}`} whileHover={{ scale: 1.02 }} whileTap={{ scale: .98 }} animate={selectedUpgrade === suite.id ? { scale: [1, 1.08, 1] } : { scale: 1 }} transition={{ duration: .32 }} onClick={() => setSelectedUpgrade(selectedUpgrade === suite.id ? null : suite.id)}>{selectedUpgrade === suite.id ? t.added : t.upgradeBtn}</motion.button></article>; })}</div><button className="skip-link" onClick={() => go("services")}>{t.noThanksKeepRoom}</button><Button className="upgrade-continue" onClick={() => go("services")}>{t.continueBtn}</Button><button className="upgrade-cart" aria-label={`${t.viewMyCart}, ${basketItemCount} ${basketItemCount > 1 ? "items" : "item"}`} onClick={() => go("basket")}><CartIcon/><span>{basketItemCount}</span></button></section></Frame>;
+      case "services": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="services-screen"><Heading title={t.servicesTitle} intro={t.servicesIntro}/><div className="service-grid">{stayServices.slice(0, 6).map((service) => {
+        const qty = selectedServices[service.id] ?? 0;
+        const isStepped = (service.maxQty ?? 1) > 1;
+        const body = <><span>{service.icone}</span><strong>{serviceName(service, lang)}</strong><small>{unitPriceLabel(service, currency, lang)}</small></>;
+        if (isStepped) {
+          return <div key={service.id} className={`stepped ${qty > 0 ? "chosen" : ""} ${autoPick === `service-${service.id}` ? "auto-pick" : ""}`} onClick={qty === 0 ? () => setServiceQty(service.id, 1, service.maxQty) : undefined}>
+            {body}
+            {qty > 0
+              ? <div className="service-stepper"><button aria-label="Remove a slot" onClick={(e) => { e.stopPropagation(); setServiceQty(service.id, qty - 1, service.maxQty); }}>−</button><span>{qty * (service.dureeHeures ?? 1)}h</span><button aria-label="Add a slot" onClick={(e) => { e.stopPropagation(); setServiceQty(service.id, qty + 1, service.maxQty); }}>+</button></div>
+              : <i>{t.addPlus}</i>}
+          </div>;
+        }
+        return <button key={service.id} className={`${qty > 0 ? "chosen" : ""} ${autoPick === `service-${service.id}` ? "auto-pick" : ""}`} onClick={() => toggleService(service.id)}>
+          {body}<i>{qty > 0 ? t.added : t.addPlus}</i>
+        </button>;
+      })}</div><Button onClick={() => go("basket")}>{t.viewMyCart}</Button></section></Frame>;
+      case "basket": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="basket-screen"><Heading title={t.basketTitle} intro={t.basketIntro}/><div className="basket-list detailed">{basketLines.length === 0 ? <p>{t.noServiceSelected}</p> : basketLines.map((line) => {
+        const isFlat = line.unitLabel === line.detailLabel;
+        return <div key={line.id} className="basket-line">
+          <div className="basket-line-head"><span>{line.nom}</span><button onClick={() => removeBasketItem(line.id)}>{t.remove}</button></div>
+          {!isFlat && <div className="basket-line-unit">{line.unitLabel}</div>}
+          <div className="basket-line-calc"><span>{isFlat ? t.flatRate : line.detailLabel}</span><strong>{formatPrice(line.total, currency)}</strong></div>
+        </div>;
+      })}</div><div className="basket-total"><span>{basketLines.length === 0 ? t.reservationPrice : t.totalStay}</span><strong>{formatPrice(total, currency)}</strong></div><Button onClick={() => go("recap")}>{t.continueBtn}</Button></section></Frame>;
+      case "recap": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="recap-screen"><Heading title={t.recapTitle} intro={t.recapIntro(config.hotelName)}/><div className="recap-grid"><article><span>⌂</span><h2>{t.roomWord}</h2><p>Deluxe Lake View<br/>{floorLabel(lang, config.floor)}</p></article><article><span>▣</span><h2>{t.parkingWord}</h2><p>{t.reservedSpot}<br/>{t.accessFrom}</p></article><article><span>⌁</span><h2>{t.servicesWord}</h2><p>{t.servicesConfirmed(basketItemCount).split("\n")[0]}<br/>{t.servicesConfirmed(basketItemCount).split("\n")[1]}</p></article><article><span>⌁</span><h2>{t.wifiWord}</h2><p>{wifiName(config)}<br/>{t.complimentaryConnection}</p></article></div><div className="map-card"><strong>{t.roomReadyPeriod}</strong><p>{t.pickupCardsReceptionNote}</p></div><Button onClick={() => go("tax")}>{t.proceedToPayment}</Button></section></Frame>;
+      case "tax": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="tax-screen"><Heading title={t.taxTitle} intro={t.taxIntro(config.city)}/><div className="tax-card"><div><small>{t.nightsAdultsLabel(stay.nights, config.guests)}</small><strong>{t.taxTitle}</strong><p>{taxResult.detailLabel}</p></div><b>{formatPrice(taxTotal, currency)}</b></div><Button onClick={() => go("payment")}>{t.acceptAndContinue}</Button></section></Frame>;
+      case "payment": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="payment-screen"><Heading title={t.paymentTitle} intro={t.choosePaymentMethod}/><div className="payment-choices"><button onClick={() => go("paymentLoading")}><span>▣</span><strong>{t.creditCard}</strong><small>{t.contactlessChipPin}</small></button><button onClick={() => go("cash")}><span><CashIcon/></span><strong>{t.cashWord}</strong><small>{t.paymentAtFrontDesk}</small></button></div><p className="amount">{t.amountDue} <strong>{formatPrice(total + taxTotal, currency)}</strong></p></section></Frame>;
+      case "paymentLoading": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="machine-screen"><Heading title={t.presentYourCard} intro={t.tapOrInsertCard}/><motion.div className="terminal-device" animate={{ opacity: [1,.55,1] }} transition={{ repeat: Infinity, duration: 1.3 }}><span>◒</span><p>{t.terminalReady}</p></motion.div><Button onClick={() => go("paymentAccepted")}>{t.paymentCompleted}</Button>{process.env.NODE_ENV !== "production" && <button className="minor-link" onClick={() => go("paymentRefused")}>{t.simulateDecline}</button>}</section></Frame>;
+      case "paymentAccepted": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="success-mark large">✓</span><Heading title={t.paymentAcceptedTitle} intro={t.amountChargedSuccess(formatPrice(total + taxTotal, currency))} brand={false}/><Button onClick={() => go("print")}>{t.printMyCards}</Button></section></Frame>;
+      case "paymentRefused": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="error-mark">!</span><Heading title={t.paymentRefusedTitle} intro={t.paymentRefusedIntro} brand={false}/><Button onClick={() => go("payment")}>{t.tryAgain}</Button></section></Frame>;
+      case "cash": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="cash-screen"><Heading title={t.cashPaymentTitle} intro={t.cashPaymentIntro}/><div className="reference">CHEEKLY-0622<br/><small>{formatPrice(total + taxTotal, currency)}</small></div><Button onClick={() => go("print")}>{t.paymentConfirmedFrontDesk}</Button></section></Frame>;
+      case "print": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="machine-screen"><Heading title={t.preparingCardsTitle} intro={t.preparingCardsIntro(cardCount ?? 1)}/><motion.div className="printer" animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.3 }}><i/><i/><i/></motion.div><Button onClick={() => go("keys")}>{t.cardsReady}</Button></section></Frame>;
+      case "keys": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="keys-screen"><Heading title={t.cardsReadyTitle} intro={t.cardsReadyIntro}/><div className="key-stack">{Array.from({ length: cardCount ?? 1 }).map((_, index) => <div key={index}><small>{config.hotelName.toUpperCase()}</small><strong>{config.room}</strong><span>{t.deluxeLakeView}</span></div>)}</div><Button onClick={() => go("final")}>{t.iCollectedMyCards}</Button></section></Frame>;
+      case "final": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="success-mark large">✓</span><Heading title={t.finalTitle(config.hotelName)} intro={t.finalIntro(config.city)} brand={false}/><Button onClick={() => go("welcome")}>{t.finish}</Button></section></Frame>;
+      case "departure": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="departure-screen"><Heading title={t.departureTitle} intro={t.departureIntro}/><div className="departure-grid"><button onClick={() => go("taxi")}><span>▰</span><strong>{t.orderTaxi}</strong><small>{t.orderTaxiDesc}</small></button></div><Button onClick={() => go("departureRecap")}>{t.finalizeCheckout}</Button></section></Frame>;
+      case "taxi": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="taxi-screen"><Heading title={t.taxiTitle} intro={t.taxiIntro}/><div className="taxi-info"><label>{t.destinationLabel}<select><option>{t.genevaAirport}</option><option>{t.lausanneStation}</option><option>{t.cityCenter}</option></select></label><label>{t.departureTimeLabel}<button onClick={() => go("time")}>{taxiTime} · {t.change}</button></label></div><Button onClick={() => go("taxiConfirm")}>{t.bookThisTaxi}</Button></section></Frame>;
+      case "taxiConfirm": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><motion.span className="success-mark large" initial={{ scale: .6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: .35 }}>✓</motion.span><Heading title={t.taxiBookedTitle} intro={t.taxiBookedIntro(taxiTime)} brand={false}/></section></Frame>;
+      case "departureRecap": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="basket-screen"><Heading title={t.departureRecapTitle} intro={t.departureRecapIntro}/><div className="basket-list">{stayBill.lines.length === 0 ? <p>{t.noServicesRecorded}</p> : stayBill.lines.map((line) => <div key={line.id}><span>{line.label}</span><strong>{line.total === 0 ? t.free : formatPrice(line.total, currency)}</strong></div>)}</div><div className="basket-total"><span>{t.totalDue}</span><strong>{formatPrice(stayBill.total, currency)}</strong></div><Button onClick={() => go("departurePayment")}>{t.proceedToPayment}</Button></section></Frame>;
+      case "departurePayment": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="payment-screen"><Heading title={t.settleStayTitle} intro={t.choosePaymentMethod}/><div className="payment-choices"><button onClick={() => go("departurePaymentLoading")}><span>▣</span><strong>{t.creditCard}</strong><small>{t.contactlessChipPin}</small></button><button onClick={() => go("departureCash")}><span><CashIcon/></span><strong>{t.cashWord}</strong><small>{t.paymentAtFrontDesk}</small></button></div><p className="amount">{t.amountDue} <strong>{formatPrice(stayBill.total, currency)}</strong></p></section></Frame>;
+      case "departurePaymentLoading": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="machine-screen"><Heading title={t.presentYourCard} intro={t.tapOrInsertCard}/><motion.div className="terminal-device" animate={{ opacity: [1,.55,1] }} transition={{ repeat: Infinity, duration: 1.3 }}><span>◒</span><p>{t.terminalReady}</p></motion.div><Button onClick={() => go("departurePaymentAccepted")}>{t.paymentCompleted}</Button>{process.env.NODE_ENV !== "production" && <button className="minor-link" onClick={() => go("departurePaymentRefused")}>{t.simulateDecline}</button>}</section></Frame>;
+      case "departurePaymentAccepted": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="success-mark large">✓</span><Heading title={t.thanksForStay} intro={t.amountChargedSuccess(formatPrice(stayBill.total, currency))} brand={false}/><div className="return-card-note">{t.returnCardNote}</div><Button onClick={() => { clearRoomOrders(config.room); go("welcome"); }}>{t.finish}</Button></section></Frame>;
+      case "departurePaymentRefused": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="error-mark">!</span><Heading title={t.paymentRefusedTitle} intro={t.paymentRefusedIntro} brand={false}/><Button onClick={() => go("departurePayment")}>{t.tryAgain}</Button></section></Frame>;
+      case "departureCash": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="cash-screen"><Heading title={t.cashPaymentTitle} intro={t.cashPaymentIntro}/><div className="reference">CHEEKLY-0622<br/><small>{formatPrice(stayBill.total, currency)}</small></div><Button onClick={() => go("departurePaymentAccepted")}>{t.paymentConfirmedFrontDesk}</Button></section></Frame>;
+      case "time": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="time-screen"><Heading title={t.timeTitle} intro={t.timeIntro}/><div className="time-display">{taxiTime}</div><div className="time-grid">{["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00"].map((value) => <button className={taxiTime === value ? "selected" : ""} onClick={() => setTaxiTime(value)} key={value}>{value}</button>)}</div><Button onClick={() => go("taxi")}>{t.confirmTime}</Button></section></Frame>;
+      case "backOffice": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="backoffice-screen"><Heading title={t.backOfficeTitle} intro={t.backOfficeIntro}/><div className="backoffice-grid"><article><small>{t.checkinsToday}</small><strong>42</strong></article><article><small>{t.cardsPrinted}</small><strong>76</strong></article><article><small>{t.paymentsPending}</small><strong>3</strong></article><article><small>{t.support}</small><strong>24/7</strong></article></div><Button onClick={() => go("welcome")}>{t.backToKiosk}</Button></section></Frame>;
     }
   })();
 
-  return <main className="kiosk"> <AnimatePresence mode="wait"><motion.div key={screen} initial={{ opacity: 0, scale: .985 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.015 }} transition={{ duration: .32, ease: [0.22, 1, 0.36, 1] }}>{content}</motion.div></AnimatePresence></main>;
+  return <main className="kiosk">
+    <motion.div key={screen} initial={{ opacity: 0, scale: .985 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .32, ease: [0.22, 1, 0.36, 1] }}>{content}</motion.div>
+    <div className="auto-demo-buttons">
+      <button className={`auto-demo-btn${autoDemoMode === "in" ? " active" : ""}`} onClick={() => { const starting = autoDemoMode !== "in"; setAutoDemoMode(starting ? "in" : null); if (starting) { autoStepIndex.current = 0; setHistory([]); setScreen("welcome"); } }}>{autoDemoMode === "in" ? "■ Arrêter" : "▶ Démo check-in"}</button>
+      <button className={`auto-demo-btn${autoDemoMode === "out" ? " active" : ""}`} onClick={() => { const starting = autoDemoMode !== "out"; setAutoDemoMode(starting ? "out" : null); if (starting) { autoStepIndex.current = 0; setHistory([]); setScreen("welcome"); } }}>{autoDemoMode === "out" ? "■ Arrêter" : "▶ Démo check-out"}</button>
+      <button className="auto-demo-btn" onClick={() => { setAutoDemoMode(null); setAutoCursor(null); autoStepIndex.current = 0; resetSelections(); setForceNotReady(true); setHistory([]); setScreen("chambrePasPrete"); }}>▶ Démo chambre pas prête</button>
+    </div>
+  </main>;
 }

@@ -3,6 +3,19 @@
 .figma-date { font-size: .94cqw; }
 .back-arrow { width: 2.6cqw; height: 2.6cqw; font-size: 1.1cqw; }
 
+.auto-demo-buttons { position: fixed; right: 24px; bottom: 24px; z-index: 40; display: flex; gap: 10px; }
+.auto-demo-btn { padding: 10px 20px; border: 1px solid var(--gold); border-radius: 24px; background: rgba(26,26,26,.85); color: #f4efe7; font-size: 13px; letter-spacing: .04em; cursor: pointer; transition: background-color .18s ease; }
+.auto-demo-btn:hover { background: rgba(26,26,26,1); }
+.auto-demo-btn.active { background: var(--brown); border-color: var(--brown); }
+
+@keyframes autoPickPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(196,169,106,.6); } 50% { box-shadow: 0 0 0 12px rgba(196,169,106,0); } }
+.auto-pick { position: relative; z-index: 5; outline: 2px solid var(--gold); outline-offset: 2px; animation: autoPickPulse .9s ease-in-out 2; }
+
+.auto-cursor { position: absolute; z-index: 60; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: rgba(196,169,106,.28); border: 2px solid var(--gold); box-shadow: 0 2px 10px rgba(0,0,0,.25); pointer-events: none; transition: left .6s cubic-bezier(.4,0,.2,1), top .6s cubic-bezier(.4,0,.2,1); }
+.auto-cursor::after { content: ""; position: absolute; inset: 0; margin: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+.auto-cursor.clicking { animation: autoCursorClick .35s ease; }
+@keyframes autoCursorClick { 0% { transform: scale(1); } 40% { transform: scale(.65); background: rgba(196,169,106,.55); } 100% { transform: scale(1); } }
+
 .brand strong { font-size: 2.1cqw; letter-spacing: .38cqw; }
 .brand i { width: 8.33cqw; margin: .52cqw 0; }
 .brand small { font-size: .5cqw; letter-spacing: .26cqw; }
@@ -49,7 +62,7 @@
 .scan-screen .scanner { width: 17.19cqw; height: 13.02cqw; }.scanner span { font-size: 7.29cqw; }.scan-screen > p { font-size: 1.04cqw; }
 .success-mark, .error-mark { width: 3.85cqw; height: 3.85cqw; font-size: 2.08cqw; }
 .confirmation-card { min-height: 9.79cqw; padding: 1.72cqw 7%; align-items: center; }.confirmation-card small { font-size: .68cqw; line-height: 1.2; }.confirmation-card strong { margin: .52cqw 0 .31cqw; font-size: 1.46cqw; line-height: 1.16; }.confirmation-card p { font-size: .78cqw; line-height: 1.35; }
-.count-question { font-size: 1.3cqw; }.number-pills { gap: 1.04cqw; }.number-pills button { width: 4.17cqw; height: 3.39cqw; font-size: 1.3cqw; }.mail-choice { font-size: .84cqw; }
+.count-question { font-size: 1.3cqw; }.count-hint { display: block; margin-top: .3cqw; font-family: 'DM Sans'; font-size: .68cqw; letter-spacing: .04em; color: var(--muted); }.number-pills { gap: 1.04cqw; }.number-pills button { width: 4.17cqw; height: 3.39cqw; font-size: 1.3cqw; }.mail-choice { font-size: .84cqw; }
 
 .upgrade-screen .screen-heading, .services-screen .screen-heading { top: 13%; }
 /* The suite cards are separated from the subtitle and use one compact text
@@ -61,6 +74,7 @@
 .recap-grid article { height: 8.44cqw; padding: 1.41cqw 2.08cqw; }.recap-grid span { margin-right: 1.3cqw; font-size: 1.98cqw; }.recap-grid h2 { font-size: 1.2cqw; }.recap-grid p { font-size: .78cqw; }.map-card { padding: 1.2cqw 1.77cqw; }.map-card strong { font-size: 1.15cqw; }.map-card p { font-size: .73cqw; }
 .tax-card { padding: 1.77cqw 2.08cqw; }.tax-card small { font-size: .63cqw; }.tax-card strong { margin: .57cqw 0 .26cqw; font-size: 1.41cqw; }.tax-card p { font-size: .83cqw; }.tax-card > b { font-size: 1.3cqw; }
 .payment-choices button, .departure-grid button { height: 13.54cqw; }.payment-choices span, .departure-grid span { margin-bottom: .94cqw; font-size: 2.71cqw; }.payment-choices strong, .departure-grid strong { font-size: 1.35cqw; }.payment-choices small, .departure-grid small { margin-top: .52cqw; font-size: .78cqw; }.amount { font-size: 1.04cqw; }.amount strong { font-size: 1.35cqw; }
+.icon-cash { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .machine-screen .terminal-device { width: 15.63cqw; height: 10.94cqw; }.terminal-device span { font-size: 3.65cqw; }.terminal-device p { font-size: .83cqw; }
 .success-mark.large { width: 4.79cqw; height: 4.79cqw; font-size: 2.5cqw; }.cash-screen .reference { padding: 1.56cqw 3.65cqw; font-size: 1.88cqw; }.reference small { margin-top: .63cqw; font-size: .89cqw; }.printer { width: 13.02cqw; height: 8.85cqw; padding: 1.3cqw; }.printer i { height: .94cqw; margin: .63cqw; }
 .key-stack { transform: translateX(-50%) scale(.92); transform-origin: top center; }.late-price { width: 17.19cqw; padding: 1.72cqw; }.late-price strong { font-size: 1.98cqw; }.late-price span { font-size: .83cqw; }.taxi-info label { padding: 1.04cqw 1.46cqw; font-size: .78cqw; }.taxi-info select, .taxi-info label button { margin-top: .52cqw; font-size: 1.2cqw; }.time-display { font-size: 2.81cqw; }.time-grid { width: 26.04cqw; gap: .68cqw; }.time-grid button { height: 2.92cqw; font-size: .94cqw; }.backoffice-grid article { min-height: 9.38cqw; padding: 1.56cqw; }.backoffice-grid small { font-size: .63cqw; }.backoffice-grid strong { margin-top: 1.3cqw; font-size: 2.71cqw; }
@@ -169,6 +183,7 @@
 
 /* 3. Services: exactly six equal cards — no seventh card can spill below the frame. */
 .services-screen .screen-heading { top: 11.5%; }
+.services-screen .screen-heading > i { margin-top: 6px; }
 .services-screen .service-grid {
   top: 35%;
   left: 14%;
@@ -184,13 +199,59 @@
   border-width: 1px;
   transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
-.service-grid button.chosen { border-width: 1px; box-shadow: inset 0 0 0 1px var(--brown); }
+.service-grid button.chosen, .service-grid div.stepped.chosen { border-width: 1px; box-shadow: inset 0 0 0 1px var(--brown); }
 .service-grid button:hover { transform: scale(1.01); box-shadow: 0 .35cqw 1cqw #8b735520; }
 .service-grid span { width: 1.9cqw; font-size: 1.45cqw; line-height: 1; }
 .service-grid strong { margin: .15cqw 0; font-size: 1.04cqw; line-height: 1.2; }
 .service-grid small, .service-grid i { font-size: .68cqw; line-height: 1.2; }
 .service-grid i { right: 1.25cqw; }
 .services-screen > .figma-button { bottom: 10%; }
+
+.service-grid div.stepped {
+  position: relative;
+  min-height: 0;
+  height: 7.25cqw;
+  padding: 1.04cqw 1.72cqw;
+  overflow: hidden;
+  border: 1px solid var(--gold);
+  border-radius: 16px;
+  background: #fffdfa;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.service-grid div.stepped:hover { transform: scale(1.01); box-shadow: 0 .35cqw 1cqw #8b735520; }
+.service-grid div.stepped.chosen { cursor: default; }
+.service-grid div.stepped.chosen:hover { transform: none; box-shadow: none; }
+.service-grid div.stepped .service-stepper {
+  position: absolute;
+  right: 1.25cqw;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: .55cqw;
+}
+.service-grid div.stepped .service-stepper span { width: auto; font: 400 .78cqw 'DM Sans'; color: var(--brown); line-height: 1; }
+.service-grid div.stepped .service-stepper button {
+  position: static;
+  display: grid;
+  place-items: center;
+  width: 1.9cqw;
+  height: 1.9cqw;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--brown);
+  font-size: .94cqw;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color .18s ease;
+}
+.service-grid div.stepped .service-stepper button:hover { background: #f3eee4; }
 
 /* 4. Basket: a quantity never affects a row or image footprint. */
 .basket-screen .screen-heading { top: 12%; }
@@ -220,6 +281,20 @@
 }
 .basket-total { top: 66%; }
 .basket-screen > .figma-button { bottom: 10%; }
+
+.basket-list.detailed { max-height: 28cqw; padding: .4cqw 1.56cqw; }
+.basket-screen .basket-list.detailed { top: 32%; bottom: 26%; max-height: none; overflow-y: auto; }
+.basket-list.detailed + .basket-total { top: 77%; }
+.basket-line { padding: 1cqw 0; border-bottom: 1px solid #e4dbcd; }
+.basket-line:last-child { border-bottom: 0; }
+.basket-line-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1cqw; }
+.basket-line-head > span { font: 400 1.04cqw 'Playfair Display'; color: var(--ink); }
+.basket-line-head > button { border: 0; background: transparent; color: var(--muted); font-size: .73cqw; cursor: pointer; }
+.basket-line-head > button:hover { color: var(--brown); }
+.basket-line-unit { margin-top: .2cqw; color: var(--gold); font-size: .68cqw; letter-spacing: .04em; }
+.basket-line-calc { display: flex; align-items: baseline; justify-content: space-between; gap: 1cqw; margin-top: .35cqw; }
+.basket-line-calc > span { color: var(--muted); font-size: .78cqw; }
+.basket-line-calc > strong { color: var(--brown); font-size: .99cqw; font-weight: 500; white-space: nowrap; }
 
 /* 5. Stay recap: aligned two-column cards, then information panel and action. */
 .recap-screen .screen-heading { top: 11.5%; }
