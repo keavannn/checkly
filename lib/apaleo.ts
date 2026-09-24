@@ -10,6 +10,7 @@ type ApaleoReservationRaw = {
   unit?: { name?: string };
   property?: { name?: string };
   ratePlan?: { id: string };
+  comment?: string;
   arrival: string;
   departure: string;
   adults: number;
@@ -126,19 +127,36 @@ export async function findReservationByLastName(lastName: string): Promise<Apale
   };
 }
 
-export type CheckInResult = { ok: boolean; message?: string };
+export type CheckInResult = { ok: boolean; noted?: boolean; message?: string };
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** Ajoute une ligne au commentaire interne de la réservation (visible par la réception dans Apaleo). Ne bloque jamais le check-in. */
+async function addReservationNote(id: string, existing: string | undefined, note: string, headers: { Authorization: string }): Promise<boolean> {
+  if (existing?.includes(note)) return true;
+  try {
+    const res = await fetch(`${API_BASE}/booking/v1/reservations/${id}`, {
+      method: "PATCH",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify([{ op: "add", path: "/comment", value: existing ? `${existing}\n${note}` : note }]),
+      signal: AbortSignal.timeout(8000),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 /** Check-in réel d'une réservation. Si l'arrivée prévue est dans le futur, on avance l'arrivée à maintenant (arrivée anticipée), comme le ferait un réceptionniste. */
-export async function checkInReservation(id: string): Promise<CheckInResult> {
+export async function checkInReservation(id: string, note?: string): Promise<CheckInResult> {
   const token = await getAccessToken();
   const headers = { Authorization: `Bearer ${token}` };
   const getRes = await fetch(`${API_BASE}/booking/v1/reservations/${id}`, { headers, signal: AbortSignal.timeout(8000), cache: "no-store" });
   if (!getRes.ok) return { ok: false, message: "Réservation introuvable" };
   const r = (await getRes.json()) as ApaleoReservationRaw;
-  if (r.status === "InHouse" || r.status === "CheckedOut") return { ok: true };
-  if (r.status !== "Confirmed") return { ok: false, message: `Statut ${r.status} : check-in impossible` };
+  const noted = note ? await addReservationNote(id, r.comment, note, headers) : false;
+  if (r.status === "InHouse" || r.status === "CheckedOut") return { ok: true, noted };
+  if (r.status !== "Confirmed") return { ok: false, noted, message: `Statut ${r.status} : check-in impossible` };
 
   if (Date.parse(r.arrival) > Date.now()) {
     const newArrivalMs = Date.now() + 4000;
@@ -146,7 +164,7 @@ export async function checkInReservation(id: string): Promise<CheckInResult> {
     const offsetMin = offsetMatch ? (offsetMatch[1] === "-" ? -1 : 1) * (Number(offsetMatch[2]) * 60 + Number(offsetMatch[3])) : 0;
     const arrivalDay = new Date(newArrivalMs + offsetMin * 60000).toISOString().slice(0, 10);
     const nights = Math.round((Date.parse(r.departure.slice(0, 10)) - Date.parse(arrivalDay)) / 86400000);
-    if (nights < 1 || !r.ratePlan) return { ok: false, message: "Arrivée anticipée impossible" };
+    if (nights < 1 || !r.ratePlan) return { ok: false, noted, message: "Arrivée anticipée impossible" };
     const ratePlanId = r.ratePlan.id;
     const amend = (sliceCount: number) => fetch(`${API_BASE}/booking/v1/reservation-actions/${id}/amend`, {
       method: "PUT",
@@ -166,15 +184,15 @@ export async function checkInReservation(id: string): Promise<CheckInResult> {
       // Avant le changement de jour hôtelier (ex. 3h du matin), Apaleo compte la nuit précédente : il indique le bon nombre de nuits.
       const expected = Number(detail?.messages?.[0]?.match(/(\d+) time slices must be specified/)?.[1]);
       if (expected > 0) amendRes = await amend(expected);
-      if (!amendRes.ok) return { ok: false, message: "Arrivée anticipée refusée" };
+      if (!amendRes.ok) return { ok: false, noted, message: "Arrivée anticipée refusée" };
     }
     await wait(4500);
   }
 
   for (let attempt = 0; attempt < 2; attempt++) {
     const res = await fetch(`${API_BASE}/booking/v1/reservation-actions/${id}/checkin`, { method: "PUT", headers, signal: AbortSignal.timeout(8000) });
-    if (res.ok) return { ok: true };
+    if (res.ok) return { ok: true, noted };
     await wait(2000);
   }
-  return { ok: false, message: "Check-in refusé par le système hôtelier" };
+  return { ok: false, noted, message: "Check-in refusé par le système hôtelier" };
 }

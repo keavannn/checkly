@@ -16,7 +16,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, message: "Identifiant de réservation invalide" }, { status: 400 });
   }
   try {
-    const result = await checkInReservation(id);
+    const rawNote = (body as { note?: unknown }).note;
+    const note = typeof rawNote === "string" && rawNote.trim() ? rawNote.trim().slice(0, 500) : undefined;
+    const result = await checkInReservation(id, note);
     return NextResponse.json(result, { status: result.ok ? 200 : 422 });
   } catch {
     return NextResponse.json({ ok: false, message: "Connexion au système hôtelier impossible" }, { status: 502 });
