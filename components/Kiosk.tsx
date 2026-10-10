@@ -113,6 +113,7 @@ export default function Kiosk() {
   const [pmsCheckin, setPmsCheckin] = useState<"idle" | "done" | "failed">("idle");
   const [pmsNoted, setPmsNoted] = useState(false);
   const [groupName, setGroupName] = useState("");
+  const [groupPersons, setGroupPersons] = useState<Record<string, number>>({});
   const go = (id: ScreenId) => {
     setHistory((current) => [...current, screen]);
     setScreen(id);
@@ -165,11 +166,12 @@ export default function Kiosk() {
     stayServices.forEach((service) => {
       const qty = selectedServices[service.id] ?? 0;
       if (qty <= 0) return;
-      const { total, detailLabel } = computeServicePrice(service, ctx, qty, lang);
+      const perPerson = groupMode && (service.pricingType === "per_person" || service.pricingType === "per_person_per_day");
+      const { total, detailLabel } = computeServicePrice(service, perPerson ? { ...ctx, guests: groupPersons[service.id] ?? GROUP_ADULTS } : ctx, qty, lang);
       lines.push({ id: service.id, nom: serviceName(service, lang), unitLabel: unitPriceLabel(service, currency, lang), detailLabel, total });
     });
     return lines;
-  }, [selectedUpgrade, selectedServices, ctx, currency, lang]);
+  }, [selectedUpgrade, selectedServices, ctx, currency, lang, groupMode, groupPersons]);
   const basketItemCount = basketLines.length;
   const removeBasketItem = (id: string) => id === selectedUpgrade ? setSelectedUpgrade(null) : setServiceQty(id, 0);
   const servicesTotal = useMemo(() => basketLines.reduce((sum, line) => sum + line.total, 0), [basketLines]);
@@ -201,6 +203,7 @@ export default function Kiosk() {
     setPmsNoted(false);
     setGroupMode(false);
     setGroupName("");
+    setGroupPersons({});
   };
   const resetJourney = () => {
     clearRoomOrders(config.room);
@@ -344,6 +347,16 @@ export default function Kiosk() {
         const qty = selectedServices[service.id] ?? 0;
         const isStepped = (service.maxQty ?? 1) > 1;
         const body = <><span>{service.icone}</span><strong>{serviceName(service, lang)}</strong><small>{unitPriceLabel(service, currency, lang)}</small></>;
+        if (groupMode && (service.pricingType === "per_person" || service.pricingType === "per_person_per_day")) {
+          const persons = groupPersons[service.id] ?? GROUP_ADULTS;
+          const setPersons = (n: number) => (n <= 0 ? setServiceQty(service.id, 0) : setGroupPersons((current) => ({ ...current, [service.id]: Math.min(GROUP_ADULTS, n) })));
+          return <div key={service.id} className={`stepped ${qty > 0 ? "chosen" : ""} ${autoPick === `service-${service.id}` ? "auto-pick" : ""}`} onClick={qty === 0 ? () => { setServiceQty(service.id, 1); setGroupPersons((current) => ({ ...current, [service.id]: GROUP_ADULTS })); } : undefined}>
+            {body}
+            {qty > 0
+              ? <div className="service-stepper"><button aria-label="Remove a guest" onClick={(e) => { e.stopPropagation(); setPersons(persons - 1); }}>−</button><span>{t.groupPersons(persons)}</span><button aria-label="Add a guest" onClick={(e) => { e.stopPropagation(); setPersons(persons + 1); }}>+</button></div>
+              : <i>{t.addPlus}</i>}
+          </div>;
+        }
         if (isStepped) {
           return <div key={service.id} className={`stepped ${qty > 0 ? "chosen" : ""} ${autoPick === `service-${service.id}` ? "auto-pick" : ""}`} onClick={qty === 0 ? () => setServiceQty(service.id, 1, service.maxQty) : undefined}>
             {body}
