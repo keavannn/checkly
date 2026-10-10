@@ -1,0 +1,71 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "app/kiosk-refinements.css"
+        ],
+        "createdAt": "2026-09-16T16:27:30.423Z",
+        "reason": "false positive: line 15 is .auto-cursor::after (an 8px dot), not a border; no border-left/border-right/thick side border exists anywhere in this file"
+      },
+      {
+        "rule": "overused-font",
+        "value": "fraunces",
+        "files": [
+          "depliants-ecole/src/commun.css"
+        ],
+        "createdAt": "2026-10-15T16:26:40.326Z",
+        "reason": "Claude: printed school health leaflet, serif picked for print readability; rule targets web UI sameness"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          "depliants-ecole/src/cataracte.html"
+        ],
+        "createdAt": "2026-10-15T16:26:41.576Z",
+        "reason": "Claude: same print leaflet font, declared in commun.css"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          "depliants-ecole/src/otite.html"
+        ],
+        "createdAt": "2026-10-15T16:26:43.057Z",
+        "reason": "Claude: same print leaflet font, declared in commun.css"
+      },
+      {
+        "rule": "all-caps-body",
+        "value": "*",
+        "files": [
+          "depliants-ecole/src/cataracte.html"
+        ],
+        "createdAt": "2026-10-15T16:26:44.324Z",
+        "reason": "Claude: uppercase only on short labels (kickers, cover eyebrow, verdict pills), no body text"
+      },
+      {
+        "rule": "all-caps-body",
+        "value": "*",
+        "files": [
+          "depliants-ecole/src/otite.html"
+        ],
+        "createdAt": "2026-10-15T16:26:45.559Z",
+        "reason": "Claude: uppercase only on short labels (kickers, cover eyebrow, verdict pills), no body text"
+      },
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          "depliants-ecole/src/cataracte.html"
+        ],
+        "createdAt": "2026-10-15T16:27:34.543Z",
+        "reason": "Claude: two-line cover title (38pt display serif) set at 0.95 on purpose; body text is 1.4"
+      }
+    ]
+  }
+}
