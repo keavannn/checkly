@@ -20,7 +20,7 @@ type ScreenId =
   | "cash" | "paymentRefused" | "backOffice"
   | "departureRecap" | "departurePayment" | "departurePaymentLoading"
   | "departurePaymentAccepted" | "departurePaymentRefused" | "departureCash"
-  | "groupFound" | "groupPayer";
+  | "groupLookup" | "groupFound" | "groupPayer";
 
 const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
@@ -75,7 +75,7 @@ const ROOM_BASE_TOTAL = 1180;
 // Simulated group booking used by the demo: one payer, several rooms (not read from the PMS).
 const GROUP = {
   name: "Martin",
-  payer: "Claire Martin",
+  payerFirst: "Claire",
   payerRoom: 301,
   floor: 3,
   rooms: [
@@ -112,6 +112,7 @@ export default function Kiosk() {
   const [pmsCheckin, setPmsCheckin] = useState<"idle" | "done" | "failed">("idle");
   const [pmsNoted, setPmsNoted] = useState(false);
   const [groupMode, setGroupMode] = useState(false);
+  const [groupName, setGroupName] = useState("");
   const go = (id: ScreenId) => {
     setHistory((current) => [...current, screen]);
     setScreen(id);
@@ -119,6 +120,7 @@ export default function Kiosk() {
   };
   const goBack = () => {
     if (history.length === 0) return;
+    if (screen === "groupFound") setGroupMode(false);
     setScreen(history[history.length - 1]);
     setHistory((current) => current.slice(0, -1));
   };
@@ -139,7 +141,9 @@ export default function Kiosk() {
     }
     go(roomIsReady ? "confirmation" : "chambrePasPrete");
   };
-  const startGroup = () => {
+  const groupDisplayName = (groupName.trim() || GROUP.name).toLowerCase().replace(/(^|[\s-])\S/g, (c) => c.toUpperCase());
+  const groupPayerName = `${GROUP.payerFirst} ${groupDisplayName}`;
+  const confirmGroup = () => {
     setGroupMode(true);
     setPmsReservation(null);
     setCardCount(GROUP.rooms.length);
@@ -196,6 +200,7 @@ export default function Kiosk() {
     setPmsCheckin("idle");
     setPmsNoted(false);
     setGroupMode(false);
+    setGroupName("");
   };
   const resetJourney = () => {
     clearRoomOrders(config.room);
@@ -218,7 +223,7 @@ export default function Kiosk() {
         .catch(() => setPmsCheckin("failed"));
     }
     if (groupMode) {
-      addOrder([{ nom: `Check-in groupe : ${GROUP.rooms.length} chambres, 1 seul paiement`, emoji: "◆", qty: 1, prix: 0 }], 0, "reception", "nouveau", true, { chambre: GROUP.payerRoom, client: GROUP.payer });
+      addOrder([{ nom: `Check-in groupe : ${GROUP.rooms.length} chambres, 1 seul paiement`, emoji: "◆", qty: 1, prix: 0 }], 0, "reception", "nouveau", true, { chambre: GROUP.payerRoom, client: groupPayerName });
     }
     basketLines.forEach((line) => {
       addOrder([{ nom: line.nom, emoji: "◆", qty: 1, prix: line.total }], line.total, "sejour", "livre", true);
@@ -258,7 +263,9 @@ export default function Kiosk() {
       { x: 24, y: 44, action: () => go("arrival") },
       { x: 28, y: 62, action: () => go("reservation") },
       { x: 50, y: 85, action: () => { setAutoPick("group-link"); } },
-      { x: 50, y: 85, action: () => startGroup() },
+      { x: 50, y: 85, action: () => go("groupLookup") },
+      { x: 50, y: 50, action: () => setGroupName(GROUP.name.toUpperCase()) },
+      { x: 50, y: 63, action: () => confirmGroup() },
       { x: 50, y: 88, action: () => go("groupPayer") },
       { x: 50, y: 88, action: () => go("payment") },
       { x: 36, y: 50, action: () => go("paymentLoading") },
@@ -323,7 +330,7 @@ export default function Kiosk() {
       </button></Frame>;
       case "languages": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="language-screen"><Heading title={t.selectLanguage} brand={false}/><div className="language-cards">{languageOptions.map(({ code, label }) => <button key={code} className={lang === code ? "active" : ""} onClick={() => { setLang(code); go("arrival"); }}>{label}</button>)}</div></section></Frame>;
       case "arrival": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="arrival-screen"><Brand/><p className="location">{config.city} - {config.country}</p><i className="title-line"/><p className="prompt">{t.howCanIHelp}</p><div className="arrival-cards"><button className="check-in" onClick={() => go("reservation")}><h2>{t.checkIn}</h2><p>{t.checkInDesc.split("\n")[0]}<br/>{t.checkInDesc.split("\n")[1]}</p><span>{t.start}</span></button><b>{t.or}</b><button className="check-out" onClick={() => go("departure")}><h2>{t.checkOut}</h2><p>{t.checkOutDesc.split("\n")[0]}<br/>{t.checkOutDesc.split("\n")[1]}</p><span>{t.start}</span></button></div></section></Frame>;
-      case "reservation": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="reservation-screen"><Heading title={t.findReservation} intro={t.findReservationIntro}/><div className="lookup-grid"><div className="lookup-card"><label>{t.lastName}<input value={reservation} onChange={(event) => setReservation(event.target.value)} placeholder="DUBOIS"/></label><Button disabled={pmsSearching} onClick={goToConfirmation}>{pmsSearching ? "…" : t.continueBtn}</Button></div><b>{t.or}</b><button className="qr-card" onClick={() => go("scan")}><span>⌗</span><strong>{t.scanMyQr}</strong><small>{t.scanMyQrDesc}</small></button></div><button className={`group-link${autoPick === "group-link" ? " auto-pick" : ""}`} onClick={startGroup}>{t.groupLink} →</button></section></Frame>;
+      case "reservation": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="reservation-screen"><Heading title={t.findReservation} intro={t.findReservationIntro}/><div className="lookup-grid"><div className="lookup-card"><label>{t.lastName}<input value={reservation} onChange={(event) => setReservation(event.target.value)} placeholder="DUBOIS"/></label><Button disabled={pmsSearching} onClick={goToConfirmation}>{pmsSearching ? "…" : t.continueBtn}</Button></div><b>{t.or}</b><button className="qr-card" onClick={() => go("scan")}><span>⌗</span><strong>{t.scanMyQr}</strong><small>{t.scanMyQrDesc}</small></button></div><button className={`group-link${autoPick === "group-link" ? " auto-pick" : ""}`} onClick={() => go("groupLookup")}>{t.groupLink} →</button></section></Frame>;
       case "scan": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="scan-screen"><Heading title={t.scanQrTitle} intro={t.scanQrIntro}/><div className="scanner"><div className="scan-laser"/><span>⌗</span></div><p>{t.scanningInProgress}</p><Button onClick={goToConfirmation}>{t.iScannedMyCode}</Button></section></Frame>;
       case "chambrePasPrete": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="wait-mark">◷</span><Heading title={t.roomNotReadyTitle} intro={t.roomNotReadyIntro} brand={false}/><Button onClick={() => go("confirmation")}>{t.continueAnyway}</Button></section></Frame>;
       case "confirmation": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="confirmation-screen"><span className="success-mark">✓</span><Heading title={t.hello(pmsReservation ? `${pmsReservation.guestFirstName} ${pmsReservation.guestLastName}` : config.guestFirst)} intro={t.confirmationIntro(stay.short, stay.nights, config.guests)} brand={false}/><div className="confirmation-card"><div><small>{t.roomLabel}</small><strong>{pmsReservation?.roomName || "Deluxe Lake View"}</strong><p>{t.roomFloorView}</p>{pmsReservation && <p className="pms-tag">🔗 {pmsReservation.guestEmail || t.pmsConnected(pmsReservation.propertyName)}</p>}</div><div><small>{t.arrivalLabel}</small><strong>{t.arrivalFrom}</strong><p className={roomIsReady ? "room-status-ready" : "room-status-wait"}>{roomIsReady ? t.roomReady : t.roomNotReady}</p></div><div><small>{t.yourKeyLabel}</small><strong>{cardCount ? t.cardsCount(cardCount) : t.toSelect}</strong><p>{t.pickupAtKiosk}</p></div></div><p className="count-question">{t.howManyCards} <span className="count-hint">{t.preselectedHint(config.guests)}</span></p><div className="number-pills">{[1,2,3,4].map((number) => <button className={`${cardCount === number ? "selected" : ""} ${autoPick === `card-${number}` ? "auto-pick" : ""}`} onClick={() => setCardCount(number)} key={number}>{number}</button>)}</div><Button className="confirmation-continue" disabled={!cardCount} onClick={() => go("upgrade")}>{t.continueBtn}</Button></section></Frame>;
@@ -362,8 +369,9 @@ export default function Kiosk() {
       case "print": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="machine-screen"><Heading title={t.preparingCardsTitle} intro={t.preparingCardsIntro(cardCount ?? 1)}/><motion.div className="printer" animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.3 }}><i/><i/><i/></motion.div><Button onClick={() => go("keys")}>{t.cardsReady}</Button></section></Frame>;
       case "keys": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="keys-screen"><Heading title={t.cardsReadyTitle} intro={t.cardsReadyIntro}/><div className="key-stack">{Array.from({ length: cardCount ?? 1 }).map((_, index) => <div key={index}><small>{config.hotelName.toUpperCase()}</small><strong>{groupMode ? GROUP.rooms[index % GROUP.rooms.length].number : config.room}</strong><span>{groupMode && GROUP.rooms[index % GROUP.rooms.length].kind === "single" ? t.groupRoomSingle.toUpperCase() : t.deluxeLakeView}</span></div>)}</div><Button onClick={() => go("final")}>{t.iCollectedMyCards}</Button></section></Frame>;
       case "final": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><span className="success-mark large">✓</span><Heading title={t.finalTitle(config.hotelName)} intro={t.finalIntro(config.city)} brand={false}/>{groupMode && <p className="pms-checkin-note">✓ {t.groupFinalRooms(GROUP.rooms.length)}<br/>✓ {t.groupFinalBill(GROUP.payerRoom)}</p>}{pmsCheckin === "done" && <p className="pms-checkin-note">✓ {t.pmsCheckedIn}{pmsNoted && <><br/>✓ {t.pmsNoteSent}</>}</p>}<Button onClick={() => go("welcome")}>{t.finish}</Button></section></Frame>;
-      case "groupFound": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="group-screen"><span className="success-mark">✓</span><Heading title={t.groupFoundTitle} intro={t.groupFoundIntro(GROUP.name, GROUP.rooms.length, stay.nights)} brand={false}/><div className="group-list">{GROUP.rooms.map((room) => <div className="group-room" key={room.number}><b>{room.number}</b><div><strong>{room.kind === "single" ? t.groupRoomSingle : "Deluxe Lake View"}</strong><small>{floorLabel(lang, GROUP.floor)} · {t.groupAdults(room.adults)}</small></div><span className="group-ready">{t.groupRoomReady}</span></div>)}</div><Button onClick={() => go("groupPayer")}>{t.groupCheckinAll(GROUP.rooms.length)}</Button></section></Frame>;
-      case "groupPayer": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="group-screen"><Heading title={t.groupPayTitle} intro={t.groupPayIntro(GROUP.payerRoom)} brand={false}/><div className="group-pay"><div className="group-payer"><small>{t.groupPayerLabel}</small><strong>{GROUP.payer}</strong><span>{t.roomWord} {GROUP.payerRoom}</span></div>{GROUP.rooms.map((room) => <div className="group-line" key={room.number}><span>{t.roomWord} {room.number} · {room.kind === "single" ? t.groupRoomSingle : "Deluxe Lake View"}</span><b>{formatPrice(room.amount, currency)}</b></div>)}<div className="group-line"><span>{t.taxTitle}</span><b>{formatPrice(groupTax, currency)}</b></div><div className="group-line group-total"><span>{t.groupTotalLabel}</span><b>{formatPrice(groupTotal, currency)}</b></div></div><Button onClick={() => go("payment")}>{t.groupPayBtn(formatPrice(groupTotal, currency))}</Button></section></Frame>;
+      case "groupLookup": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="reservation-screen"><Heading title={t.groupLookupTitle} intro={t.groupLookupIntro}/><div className="lookup-grid group-lookup-grid"><div className="lookup-card"><label>{t.lastName}<input value={groupName} onChange={(event) => setGroupName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") confirmGroup(); }} placeholder={GROUP.name.toUpperCase()}/></label><Button onClick={confirmGroup}>{t.continueBtn}</Button></div></div></section></Frame>;
+      case "groupFound": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="group-screen"><span className="success-mark">✓</span><Heading title={t.groupFoundTitle} intro={t.groupFoundIntro(groupDisplayName, GROUP.rooms.length, stay.nights)} brand={false}/><div className="group-list">{GROUP.rooms.map((room) => <div className="group-room" key={room.number}><b>{room.number}</b><div><strong>{room.kind === "single" ? t.groupRoomSingle : "Deluxe Lake View"}</strong><small>{floorLabel(lang, GROUP.floor)} · {t.groupAdults(room.adults)}</small></div><span className="group-ready">{t.groupRoomReady}</span></div>)}</div><Button onClick={() => go("groupPayer")}>{t.groupCheckinAll(GROUP.rooms.length)}</Button></section></Frame>;
+      case "groupPayer": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="group-screen"><Heading title={t.groupPayTitle} intro={t.groupPayIntro(GROUP.payerRoom)} brand={false}/><div className="group-pay"><div className="group-payer"><small>{t.groupPayerLabel}</small><strong>{groupPayerName}</strong><span>{t.roomWord} {GROUP.payerRoom}</span></div>{GROUP.rooms.map((room) => <div className="group-line" key={room.number}><span>{t.roomWord} {room.number} · {room.kind === "single" ? t.groupRoomSingle : "Deluxe Lake View"}</span><b>{formatPrice(room.amount, currency)}</b></div>)}<div className="group-line"><span>{t.taxTitle}</span><b>{formatPrice(groupTax, currency)}</b></div><div className="group-line group-total"><span>{t.groupTotalLabel}</span><b>{formatPrice(groupTotal, currency)}</b></div></div><Button onClick={() => go("payment")}>{t.groupPayBtn(formatPrice(groupTotal, currency))}</Button></section></Frame>;
       case "departure": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="departure-screen"><Heading title={t.departureTitle} intro={t.departureIntro}/><div className="departure-grid"><button onClick={() => go("taxi")}><span>▰</span><strong>{t.orderTaxi}</strong><small>{t.orderTaxiDesc}</small></button></div><Button onClick={() => go("departureRecap")}>{t.finalizeCheckout}</Button></section></Frame>;
       case "taxi": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="taxi-screen"><Heading title={t.taxiTitle} intro={t.taxiIntro}/><div className="taxi-info"><label>{t.destinationLabel}<select><option>{t.genevaAirport}</option><option>{t.lausanneStation}</option><option>{t.cityCenter}</option></select></label><label>{t.departureTimeLabel}<button onClick={() => go("time")}>{taxiTime} · {t.change}</button></label></div><Button onClick={() => go("taxiConfirm")}>{t.bookThisTaxi}</Button></section></Frame>;
       case "taxiConfirm": return <Frame onBack={goBack} canGoBack={history.length > 0} autoCursor={autoCursor}><section className="result-screen"><motion.span className="success-mark large" initial={{ scale: .6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: .35 }}>✓</motion.span><Heading title={t.taxiBookedTitle} intro={t.taxiBookedIntro(taxiTime)} brand={false}/></section></Frame>;

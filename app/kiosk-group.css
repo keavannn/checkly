@@ -23,3 +23,5 @@
 
 .group-link { position: absolute; bottom: 10.5%; left: 50%; transform: translateX(-50%); padding: .7cqw 1.8cqw; border: 1px solid var(--gold); border-radius: 99px; background: transparent; color: var(--brown); font-size: 1.05cqw; letter-spacing: .05em; white-space: nowrap; cursor: pointer; transition: background-color .18s ease; }
 .group-link:hover { background: #f3eee4; }
+
+.group-lookup-grid { grid-template-columns: 1fr; left: 30%; width: 40%; }
