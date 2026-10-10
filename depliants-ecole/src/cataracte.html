@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Dépliant – La cataracte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=block">
+<link rel="stylesheet" href="commun.css">
+<style>
+  :root {
+    --ink: #1c2b33;
+    --ink-strong: #0f1f28;
+    --muted: #57676f;
+    --primary: #0e5a6b;
+    --accent: #d08a2e;
+    --accent-ink: #9d6219;
+    --accent-soft: #f6e2c0;
+    --soft: #e7f1f2;
+    --line: #cddadd;
+    --alert: #c4473a;
+    --alert-soft: #fbe9e6;
+    --alert-ink: #9b2f24;
+    --cover-bg: linear-gradient(165deg, #13707f 0%, #0b4654 100%);
+    --cover-accent: #ffd99e;
+  }
+</style>
+</head>
+<body>
+
+<!-- Icônes (réutilisées avec <use>) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-flou" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.5 12 C 5.5 7, 9 5.5, 12 5.5 S 18.5 7, 21.5 12 C 18.5 17, 15 18.5, 12 18.5 S 5.5 17, 2.5 12 Z"/>
+      <circle cx="12" cy="12" r="3.3" style="fill:var(--accent);stroke:none" opacity=".55"/>
+      <path d="M6 10.2 q1.5 -1.1 3 0 t3 0 t3 0 t3 0" style="stroke:var(--accent)"/>
+      <path d="M6 14 q1.5 -1.1 3 0 t3 0 t3 0 t3 0" style="stroke:var(--accent)"/>
+    </g></symbol>
+    <symbol id="i-soleil" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4.2" style="fill:var(--accent);stroke:none"/>
+      <path d="M12 2.5v2.5 M12 19v2.5 M2.5 12h2.5 M19 12h2.5 M5.3 5.3l1.8 1.8 M16.9 16.9l1.8 1.8 M5.3 18.7l1.8-1.8 M16.9 7.1l1.8-1.8"/>
+    </g></symbol>
+    <symbol id="i-couleurs" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.3">
+      <circle cx="8.8" cy="9.5" r="5" style="fill:var(--accent)" fill-opacity=".45"/>
+      <circle cx="15.2" cy="9.5" r="5" style="fill:var(--primary)" fill-opacity=".25"/>
+      <circle cx="12" cy="15" r="5" style="fill:#c9b37a" fill-opacity=".45"/>
+    </g></symbol>
+    <symbol id="i-lune" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <path d="M15.5 3.5 A8.5 8.5 0 1 0 20.5 16 A7 7 0 0 1 15.5 3.5 Z" style="fill:var(--accent-soft)"/>
+      <circle cx="19" cy="6" r=".9" style="fill:var(--accent);stroke:none"/>
+    </g></symbol>
+    <symbol id="i-double" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7">
+      <circle cx="9.8" cy="12" r="5.6"/>
+      <circle cx="14.6" cy="12" r="5.6" style="stroke:var(--accent)"/>
+    </g></symbol>
+    <symbol id="i-lunettes" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+      <circle cx="6.8" cy="13" r="4" style="fill:var(--accent-soft)"/>
+      <circle cx="17.2" cy="13" r="4" style="fill:var(--accent-soft)"/>
+      <path d="M10.8 13 q1.2 -1.6 2.4 0 M2.8 12.5 L1.6 9.5 M21.2 12.5 L22.4 9.5"/>
+    </g></symbol>
+    <symbol id="i-gouttes" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <rect x="8.5" y="2.5" width="7" height="9" rx="1.8" style="fill:var(--accent-soft)"/>
+      <path d="M10 11.5 h4 l-1.2 3 h-1.6 z"/>
+      <path d="M12 17 c0 0 -2.1 2.4 -2.1 3.6 a2.1 2.1 0 0 0 4.2 0 c0 -1.2 -2.1 -3.6 -2.1 -3.6 z" style="fill:var(--accent);stroke:none"/>
+    </g></symbol>
+    <symbol id="i-coque" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7">
+      <path d="M3 12 C 3 6.5, 8 4, 12 4 C 16 4, 21 6.5, 21 12 C 21 17.5, 16 20, 12 20 C 8 20, 3 17.5, 3 12 Z" style="fill:var(--accent-soft)"/>
+      <g style="fill:currentColor;stroke:none"><circle cx="8.5" cy="10" r="1"/><circle cx="12" cy="8.8" r="1"/><circle cx="15.5" cy="10" r="1"/><circle cx="10" cy="13.6" r="1"/><circle cx="14" cy="13.6" r="1"/><circle cx="12" cy="16.6" r="1"/></g>
+    </g></symbol>
+    <symbol id="i-piscine" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9.5"/>
+      <path d="M5.5 10.5 q1.6 -1.6 3.25 0 t3.25 0 t3.25 0 t3.25 0" style="stroke:var(--accent)"/>
+      <path d="M5.5 14.5 q1.6 -1.6 3.25 0 t3.25 0 t3.25 0 t3.25 0" style="stroke:var(--accent)"/>
+      <path d="M5.3 5.3 L18.7 18.7" style="stroke:var(--alert)"/>
+    </g></symbol>
+    <symbol id="i-voiture" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <path d="M3.5 16 V13 l2 -5 a2 2 0 0 1 1.9 -1.3 h9.2 a2 2 0 0 1 1.9 1.3 l2 5 v3 z" style="fill:var(--accent-soft)"/>
+      <path d="M5 12.5 h14" stroke-linecap="round"/>
+      <circle cx="7.5" cy="17" r="2" style="fill:currentColor;stroke:none"/>
+      <circle cx="16.5" cy="17" r="2" style="fill:currentColor;stroke:none"/>
+    </g></symbol>
+    <symbol id="i-solaires" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.5 10 h8 v2.5 a3.5 3.5 0 0 1 -3.5 3.5 h-1 a3.5 3.5 0 0 1 -3.5 -3.5 z" style="fill:currentColor"/>
+      <path d="M13.5 10 h8 v2.5 a3.5 3.5 0 0 1 -3.5 3.5 h-1 a3.5 3.5 0 0 1 -3.5 -3.5 z" style="fill:currentColor"/>
+      <path d="M10.5 11 q1.5 -1.2 3 0"/>
+      <circle cx="18.5" cy="4.5" r="2" style="fill:var(--accent);stroke:none"/>
+    </g></symbol>
+    <symbol id="i-tabac" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="12" width="14" height="3.4" rx=".6" style="fill:#fff"/>
+      <rect x="17" y="12" width="4" height="3.4" rx=".6" style="fill:var(--accent)"/>
+      <path d="M17.5 9 c0 -1.4 1.4 -1.4 1.4 -2.8 s-1.4 -1.4 -1.4 -2.8" opacity=".55"/>
+      <path d="M3.5 4 L20.5 21" style="stroke:var(--alert)"/>
+    </g></symbol>
+    <symbol id="i-goutte" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3 C 12 3, 6 10, 6 14.2 a6 6 0 0 0 12 0 C 18 10, 12 3, 12 3 Z" style="fill:var(--accent-soft)"/>
+      <path d="M9.4 14.6 a2.6 2.6 0 0 0 2.6 2.6"/>
+    </g></symbol>
+    <symbol id="i-pomme" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 7.5 C 9.5 5.8, 4.5 6.3, 4.5 12 C 4.5 17, 8 21, 10 20.5 C 11 20.2, 13 20.2, 14 20.5 C 16 21, 19.5 17, 19.5 12 C 19.5 6.3, 14.5 5.8, 12 7.5 Z" style="fill:var(--accent-soft)"/>
+      <path d="M12 7.5 C 12 5.5, 12.5 4, 14 3"/>
+      <path d="M13.4 5 C 14.6 3.2, 17 3, 18.2 3.8 C 17.2 5.5, 15 5.8, 13.4 5 Z" style="fill:var(--accent);stroke:none"/>
+    </g></symbol>
+    <symbol id="i-oeil" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <path d="M2.5 12 C 5.5 7, 9 5.5, 12 5.5 S 18.5 7, 21.5 12 C 18.5 17, 15 18.5, 12 18.5 S 5.5 17, 2.5 12 Z"/>
+      <circle cx="12" cy="12" r="3.5" style="fill:var(--accent);stroke:none"/>
+      <circle cx="13.2" cy="10.8" r="1" style="fill:#fff;stroke:none"/>
+    </g></symbol>
+  </defs>
+</svg>
+
+<!-- ================= RECTO (extérieur) : rabat | dos | couverture ================= -->
+<section class="sheet">
+
+  <!-- Rabat : on le voit en ouvrant la couverture -->
+  <div class="panel w97">
+    <div class="kicker"><span class="num">?</span>Idées reçues</div>
+    <h2>Vrai ou faux ?</h2>
+    <p class="lead">Testez ce que vous savez sur la cataracte.</p>
+
+    <div class="vf">
+      <q>La cataracte est une peau qui pousse sur l'œil.</q>
+      <p><span class="verdict">Faux</span>C'est le <strong>cristallin</strong>, une lentille située à l'intérieur de l'œil, qui devient opaque.</p>
+    </div>
+    <div class="vf">
+      <q>Il faut attendre qu'elle soit « mûre » pour opérer.</q>
+      <p><span class="verdict">Faux</span>On opère dès que la baisse de vue gêne la vie de tous les jours : lire, conduire, reconnaître les visages…</p>
+    </div>
+    <div class="vf">
+      <q>Des gouttes ou des lunettes peuvent la guérir.</q>
+      <p><span class="verdict">Faux</span>Les lunettes aident un temps, mais seule la <strong>chirurgie</strong> soigne la cataracte.</p>
+    </div>
+    <div class="vf">
+      <q>Elle ne touche que les personnes âgées.</q>
+      <p><span class="verdict">Faux</span>Elle peut aussi toucher des personnes plus jeunes (diabète, choc sur l'œil, médicaments) et même des bébés.</p>
+    </div>
+    <div class="vf">
+      <q>La cataracte peut revenir après l'opération.</q>
+      <p><span class="verdict nuance">Pas vraiment</span>Le cristallin retiré ne repousse pas. Mais l'enveloppe qui tient l'implant peut se voiler, parfois des années plus tard : c'est la « cataracte secondaire », traitée au laser en quelques minutes.</p>
+    </div>
+    <div class="vf">
+      <q>L'opération fait mal.</q>
+      <p><span class="verdict">Faux</span>Elle se fait sous anesthésie locale. On peut sentir une petite gêne, mais pas de douleur.</p>
+    </div>
+
+    <div class="fact">
+      <svg viewBox="0 0 50 66" role="img" aria-label="Tableau de lettres pour mesurer la vue">
+        <rect x="1" y="1" width="48" height="64" rx="3" fill="#fff" stroke="#0e5a6b" stroke-width="1.2"/>
+        <g text-anchor="middle" font-weight="700" fill="#1c2b33">
+          <text x="25" y="17" font-size="13">Z</text>
+          <text x="25" y="29.5" font-size="8.6" letter-spacing="2">U D</text>
+          <text x="25" y="39.5" font-size="6.4" letter-spacing="1.4">N F E</text>
+          <text x="25" y="47.5" font-size="4.8" letter-spacing="1">R O V Z</text>
+          <text x="25" y="54" font-size="3.7" letter-spacing=".8">D E F U N</text>
+          <text x="25" y="59.5" font-size="2.9" letter-spacing=".6">Z R O E F U</text>
+        </g>
+        <path d="M6 61.5 H44" stroke="#d08a2e" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <span class="t">Le saviez-vous ?</span>
+        Pour mesurer la vue, on lit des lettres de plus en plus petites. En France, le résultat se note en dixièmes : <strong>10/10</strong>, c'est une vue normale.
+      </div>
+    </div>
+  </div>
+
+  <!-- Dos : visible quand le dépliant est fermé, au verso -->
+  <div class="panel w100">
+    <div class="kicker"><span class="num">04</span>Après l'opération</div>
+    <h2>Bien récupérer</h2>
+    <ul class="icons">
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-gouttes"/></svg></span><span>Mettre les <strong>gouttes prescrites</strong> pendant plusieurs semaines, les mains bien lavées.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-coque"/></svg></span><span><strong>Ne pas frotter l'œil</strong> et porter la coque de protection la nuit, les premiers jours.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-piscine"/></svg></span><span>Éviter quelques semaines la piscine, la poussière, le maquillage des yeux et les gros efforts.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-voiture"/></svg></span><span>Ne reprendre la <strong>conduite</strong> qu'avec l'accord du médecin.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-lunettes"/></svg></span><span>La vue s'améliore souvent en quelques jours. De nouvelles lunettes sont prescrites environ <strong>1&nbsp;mois</strong> après.</span></li>
+    </ul>
+    <div class="alert">
+      <div class="t">Urgence</div>
+      Douleur forte, œil très rouge ou vue qui baisse après l'opération : appelez <strong>tout de suite</strong> votre ophtalmologiste.
+    </div>
+
+    <h3>Protéger ses yeux</h3>
+    <ul class="icons">
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-solaires"/></svg></span><span><strong>Lunettes de soleil</strong> marquées CE (catégorie 3 en plein soleil) et chapeau.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-tabac"/></svg></span><span>Ne pas fumer, limiter l'alcool.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-goutte"/></svg></span><span>Bien équilibrer un <strong>diabète</strong>.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-pomme"/></svg></span><span>Manger varié, avec des fruits et des légumes.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-oeil"/></svg></span><span>Consulter un <strong>ophtalmologiste</strong> dès que la vue change, et régulièrement après 60 ans.</span></li>
+    </ul>
+
+    <div class="footer">
+      <p><strong>Sources :</strong> Inserm, Assurance Maladie (ameli.fr), DREES, Organisation mondiale de la santé (OMS).</p>
+      <p>Ce dépliant informe : il ne remplace pas l'avis d'un médecin.</p>
+      <div class="by">Réalisé par : <span></span></div>
+    </div>
+  </div>
+
+  <!-- Couverture -->
+  <div class="panel w100 cover">
+    <div class="eyebrow">Santé des yeux · Dépliant d'information</div>
+    <div class="art">
+      <svg viewBox="0 0 240 170" role="img" aria-label="Un œil dont le cristallin est voilé">
+        <defs>
+          <radialGradient id="cvIris" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#63b6c6"/>
+            <stop offset=".55" stop-color="#2a7f92"/>
+            <stop offset="1" stop-color="#0f4b59"/>
+          </radialGradient>
+          <radialGradient id="cvCloud" cx="44%" cy="40%" r="58%">
+            <stop offset="0" stop-color="#fff9ea" stop-opacity=".96"/>
+            <stop offset=".55" stop-color="#f3d9a6" stop-opacity=".82"/>
+            <stop offset="1" stop-color="#e2b46a" stop-opacity=".2"/>
+          </radialGradient>
+          <clipPath id="cvEye"><path d="M-98 0 C -58 -58, 58 -58, 98 0 C 58 58, -58 58, -98 0 Z"/></clipPath>
+        </defs>
+        <g fill="none" stroke="#fff" stroke-opacity=".09">
+          <circle cx="120" cy="86" r="84"/>
+          <circle cx="120" cy="86" r="64"/>
+        </g>
+        <g transform="translate(120 86)">
+          <path d="M-90 -24 C -50 -76, 50 -76, 90 -24" fill="none" stroke="#bfe0e6" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/>
+          <path d="M-98 0 C -58 -58, 58 -58, 98 0 C 58 58, -58 58, -98 0 Z" fill="#f8f4ec"/>
+          <g clip-path="url(#cvEye)">
+            <circle r="36" fill="url(#cvIris)"/>
+            <circle r="24" fill="none" stroke="#dff3f6" stroke-opacity=".22" stroke-width="22" stroke-dasharray=".8 2.3"/>
+            <circle r="36" fill="none" stroke="#0a3843" stroke-width="2.2"/>
+            <circle r="14" fill="#08171c"/>
+            <circle r="17" fill="url(#cvCloud)"/>
+            <circle cx="-12" cy="-13" r="5" fill="#fff" opacity=".92"/>
+            <circle cx="9" cy="9" r="2" fill="#fff" opacity=".6"/>
+            <path d="M-98 -3 C -58 -55, 58 -55, 98 -3" fill="none" stroke="#cfc6b6" stroke-opacity=".5" stroke-width="8"/>
+          </g>
+          <path d="M-98 0 C -58 -58, 58 -58, 98 0" fill="none" stroke="#062b33" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M-98 0 C -58 58, 58 58, 98 0" fill="none" stroke="#062b33" stroke-opacity=".45" stroke-width="1.6"/>
+          <g stroke="#062b33" stroke-width="2.4" stroke-linecap="round" fill="none">
+            <path d="M-75.4 -22.2 Q -81 -24 -84.5 -30.5"/>
+            <path d="M-45.6 -36.5 Q -49.5 -40 -51.5 -46.5"/>
+            <path d="M0 -43.5 Q -1 -49 1 -55"/>
+            <path d="M45.6 -36.5 Q 49.5 -40 51.5 -46.5"/>
+            <path d="M75.4 -22.2 Q 81 -24 84.5 -30.5"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <h1>La<br>cataracte</h1>
+    <p class="sub">Quand le cristallin se voile : comprendre, reconnaître et se soigner.</p>
+    <div class="tags">
+      <span class="tag">Définition</span>
+      <span class="tag">Symptômes</span>
+      <span class="tag">Opération</span>
+      <span class="tag">Prévention</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VERSO (intérieur) : 3 volets, de gauche à droite ================= -->
+<section class="sheet">
+
+  <!-- Volet 1 -->
+  <div class="panel w100">
+    <div class="kicker"><span class="num">01</span>Comprendre</div>
+    <h2>Qu'est-ce que la cataracte ?</h2>
+    <p>Derrière l'iris, la partie colorée de l'œil, se trouve le <strong>cristallin</strong> : une petite lentille naturelle et transparente. Comme l'objectif d'un appareil photo, il fait la mise au point des images sur la <strong>rétine</strong>.</p>
+
+    <figure class="figure">
+      <svg viewBox="0 0 240 82" role="img" aria-label="L'œil fonctionne comme un appareil photo">
+        <!-- appareil photo -->
+        <rect x="34" y="16" width="64" height="44" rx="6" fill="#eef6f7" stroke="#0e5a6b" stroke-width="2"/>
+        <rect x="52" y="9" width="22" height="8" rx="2" fill="#eef6f7" stroke="#0e5a6b" stroke-width="2"/>
+        <rect x="80" y="10.5" width="9" height="5.5" rx="1.5" fill="#0e5a6b"/>
+        <rect x="14" y="26" width="20" height="24" rx="2" fill="#dbe9eb" stroke="#0e5a6b" stroke-width="2"/>
+        <g stroke="#d08a2e" stroke-width="1.1" fill="none" stroke-linecap="round">
+          <path d="M2 31 H24 L89 38"/>
+          <path d="M2 38 H89"/>
+          <path d="M2 45 H24 L89 38"/>
+        </g>
+        <ellipse cx="24" cy="38" rx="4" ry="10" fill="#fdf3dc" stroke="#d08a2e" stroke-width="1.6"/>
+        <path d="M91 26 V50" stroke="#e07b5f" stroke-width="3.2" stroke-linecap="round"/>
+        <!-- signe égal -->
+        <path d="M112 34 H124 M112 42 H124" stroke="#d08a2e" stroke-width="2.4" stroke-linecap="round"/>
+        <!-- œil -->
+        <path d="M214 33 L232 32 L232 44 L214 43 Z" fill="#f3ddb0" stroke="#d2ad6a" stroke-width="1"/>
+        <circle cx="192" cy="38" r="24" fill="#eef6f7" stroke="#0e5a6b" stroke-width="2"/>
+        <path d="M171 26.4 A14 14 0 0 0 171 49.6" fill="#dcedf0" stroke="#0e5a6b" stroke-width="1.6"/>
+        <path d="M204.6 20 A22 22 0 0 1 204.6 56" fill="none" stroke="#e07b5f" stroke-width="2.8"/>
+        <g stroke="#d08a2e" stroke-width="1.1" fill="none" stroke-linecap="round">
+          <path d="M138 31 H178 L213 38"/>
+          <path d="M138 38 H213"/>
+          <path d="M138 45 H178 L213 38"/>
+        </g>
+        <ellipse cx="178" cy="38" rx="3.6" ry="8.6" fill="#fdf3dc" stroke="#d08a2e" stroke-width="1.6"/>
+        <path d="M173.5 27.5 V32 M173.5 44 V48.5" stroke="#0e5a6b" stroke-width="2.6" stroke-linecap="round"/>
+        <!-- repères -->
+        <g stroke="#7f8f96" stroke-width=".6">
+          <path d="M24 62 V50"/>
+          <path d="M91 62 V52"/>
+          <path d="M178 62 V48"/>
+          <path d="M212 62 L207 54"/>
+        </g>
+        <g font-size="7.6" text-anchor="middle" font-weight="700">
+          <text x="24" y="69" fill="#9d6219">objectif</text>
+          <text x="91" y="69" fill="#b65a43">capteur</text>
+          <text x="178" y="69" fill="#9d6219">cristallin</text>
+          <text x="214" y="69" fill="#b65a43">rétine</text>
+        </g>
+        <g font-size="7.2" text-anchor="middle" fill="#57676f">
+          <text x="57" y="79">Appareil photo</text>
+          <text x="192" y="79">Œil</text>
+        </g>
+      </svg>
+    </figure>
+
+    <p>La cataracte, c'est la <strong>perte progressive de transparence du cristallin</strong>. La lumière passe mal : la vue se voile, comme à travers une vitre embuée.</p>
+
+    <figure class="figure">
+      <svg viewBox="0 0 240 156" role="img" aria-label="Coupe de l'œil avec un cristallin opacifié">
+        <defs>
+          <radialGradient id="lens" cx="50%" cy="45%" r="60%">
+            <stop offset="0" stop-color="#fff6e3"/>
+            <stop offset=".6" stop-color="#f1d49b"/>
+            <stop offset="1" stop-color="#d9a957"/>
+          </radialGradient>
+        </defs>
+        <path d="M182 73 C 200 73, 212 75, 236 77 L 236 91 C 212 89, 200 87, 182 87 Z" fill="#f3ddb0" stroke="#d2ad6a" stroke-width="1"/>
+        <circle cx="135" cy="80" r="52" fill="#eef6f7" stroke="#0e5a6b" stroke-width="2.4"/>
+        <path d="M155.7 35.6 A49 49 0 0 1 155.7 124.4" fill="none" stroke="#e07b5f" stroke-width="2.4"/>
+        <path d="M88 57.8 A28 28 0 0 0 88 102.2" fill="#dcedf0" stroke="#0e5a6b" stroke-width="2"/>
+        <g stroke="#d08a2e" stroke-width="1" stroke-dasharray="2 2" stroke-linecap="round" opacity=".75">
+          <path d="M109 74 L166 43"/>
+          <path d="M109 77 L181 63"/>
+          <path d="M109 82 L183 89"/>
+          <path d="M109 85 L175 108"/>
+          <path d="M109 88 L155 122"/>
+        </g>
+        <ellipse cx="101" cy="80" rx="7.5" ry="17" fill="url(#lens)" stroke="#b9853a" stroke-width="1"/>
+        <path d="M92 56 L92 71 M92 89 L92 104" stroke="#0e5a6b" stroke-width="4" stroke-linecap="round"/>
+        <g stroke="#d08a2e" stroke-width="1.4" stroke-linecap="round" fill="none">
+          <path d="M8 74 H 95"/>
+          <path d="M8 80 H 95"/>
+          <path d="M8 86 H 95"/>
+        </g>
+        <g fill="#d08a2e">
+          <path d="M40 71.6 L45 74 L40 76.4 Z"/>
+          <path d="M40 77.6 L45 80 L40 82.4 Z"/>
+          <path d="M40 83.6 L45 86 L40 88.4 Z"/>
+        </g>
+        <g stroke="#7f8f96" stroke-width=".6" fill="none">
+          <path d="M50 44 L82 64"/>
+          <path d="M92 28 L92 53"/>
+          <path d="M101 139 L101 99"/>
+          <path d="M182 26 L168 44"/>
+          <path d="M212 100 L212 90"/>
+        </g>
+        <g font-size="8" fill="#1c2b33">
+          <text x="44" y="41" text-anchor="middle" font-weight="600">Cornée</text>
+          <text x="92" y="24" text-anchor="middle" font-weight="600">Iris</text>
+          <text x="101" y="148" text-anchor="middle" font-weight="700" fill="#9d6219">Cristallin opacifié</text>
+          <text x="186" y="22" text-anchor="middle" font-weight="600">Rétine</text>
+          <text x="212" y="109" text-anchor="middle" font-weight="600">Nerf optique</text>
+          <text x="8" y="68" font-size="7" font-style="italic" fill="#9d6219">lumière</text>
+        </g>
+      </svg>
+      <figcaption class="caption">Le cristallin opacifié disperse la lumière au lieu de la concentrer sur la rétine.</figcaption>
+    </figure>
+
+    <div class="stats">
+      <div class="stat"><b>≈ 20 %</b><span>des personnes sont touchées vers 65 ans</span></div>
+      <div class="stat"><b>+ 60 %</b><span>des personnes de plus de 85 ans</span></div>
+      <div class="stat"><b>1<span class="sup">re</span></b><span>cause de cécité dans le monde (OMS)</span></div>
+    </div>
+  </div>
+
+  <!-- Volet 2 -->
+  <div class="panel w100">
+    <div class="kicker"><span class="num">02</span>Reconnaître</div>
+    <h2>Les signes qui doivent alerter</h2>
+
+    <figure class="figure">
+      <svg viewBox="0 0 212 80" role="img" aria-label="Le même paysage vu normalement puis avec une cataracte">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8fcbe6"/>
+            <stop offset="1" stop-color="#e4f4f9"/>
+          </linearGradient>
+          <radialGradient id="glare">
+            <stop offset="0" stop-color="#fffbea" stop-opacity="1"/>
+            <stop offset=".35" stop-color="#fff2c6" stop-opacity=".85"/>
+            <stop offset="1" stop-color="#fff2c6" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="voile" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="1.5"/>
+            <feColorMatrix type="matrix" values=".50 .38 .12 0 .08  .42 .46 .12 0 .06  .28 .30 .22 0 .03  0 0 0 1 0"/>
+          </filter>
+          <clipPath id="frame"><rect x="0" y="0" width="100" height="66" rx="5"/></clipPath>
+          <g id="scene">
+            <rect x="-8" y="-8" width="116" height="82" fill="url(#sky)"/>
+            <circle cx="80" cy="15" r="6.5" fill="#ffd451"/>
+            <path d="M-8 47 C 18 37, 38 43, 54 39 C 70 35, 86 41, 108 36 L108 74 L-8 74 Z" fill="#79bd67"/>
+            <path d="M-8 57 C 30 50, 70 54, 108 49 L108 74 L-8 74 Z" fill="#5fa653"/>
+            <path d="M42 74 L49 47 L53 47 L64 74 Z" fill="#d8cfbf"/>
+            <rect x="16" y="33" width="20" height="15" fill="#f4efe4"/>
+            <path d="M13.5 34 L26 24 L38.5 34 Z" fill="#d1503b"/>
+            <rect x="23.5" y="40" width="5" height="8" fill="#6b4a37"/>
+            <rect x="18.5" y="37" width="4" height="4" fill="#5d9fcf"/>
+            <rect x="30" y="37" width="4" height="4" fill="#5d9fcf"/>
+            <rect x="68.5" y="38" width="2.6" height="10" fill="#7a5638"/>
+            <circle cx="69.8" cy="33.5" r="7" fill="#3c8c4c"/>
+            <circle cx="8" cy="60" r="1.9" fill="#e3427a"/>
+            <circle cx="13" cy="63.5" r="1.9" fill="#f2c230"/>
+            <circle cx="20" cy="60.5" r="1.9" fill="#7b5cd6"/>
+            <circle cx="78" cy="61" r="1.9" fill="#f2c230"/>
+            <circle cx="85" cy="58" r="1.9" fill="#e3427a"/>
+            <circle cx="91" cy="62.5" r="1.9" fill="#7b5cd6"/>
+          </g>
+        </defs>
+        <g clip-path="url(#frame)"><use href="#scene"/></g>
+        <g transform="translate(112 0)">
+          <g clip-path="url(#frame)">
+            <g filter="url(#voile)"><use href="#scene"/></g>
+            <rect width="100" height="66" fill="#f3e3bd" opacity=".3"/>
+            <circle cx="80" cy="15" r="22" fill="url(#glare)"/>
+          </g>
+        </g>
+        <g font-size="7.6" font-weight="700" text-anchor="middle">
+          <text x="50" y="76" fill="#0e5a6b">Vision normale</text>
+          <text x="162" y="76" fill="#9d6219">Avec une cataracte</text>
+        </g>
+      </svg>
+    </figure>
+
+    <div class="tiles">
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-flou"/></svg></span><b>Vue floue</b>comme dans le brouillard</div>
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-soleil"/></svg></span><b>Éblouissement</b>soleil, phares la nuit</div>
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-couleurs"/></svg></span><b>Couleurs ternes</b>et jaunies</div>
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-lune"/></svg></span><b>Gêne le soir</b>pour lire ou conduire</div>
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-double"/></svg></span><b>Vision double</b>d'un seul œil</div>
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-lunettes"/></svg></span><b>Lunettes</b>à changer souvent</div>
+    </div>
+
+    <div class="callout">Elle s'installe <strong>lentement</strong>, <strong>sans douleur ni rougeur</strong>. Une baisse de vue brutale n'est pas une cataracte : c'est une urgence.</div>
+
+    <h3>Pourquoi apparaît-elle ?</h3>
+    <p>Le plus souvent, c'est le <strong>vieillissement naturel</strong> du cristallin, à partir de 60 ans environ. Certains facteurs l'accélèrent :</p>
+    <div class="chips">
+      <span class="chip">Diabète</span>
+      <span class="chip">Tabac</span>
+      <span class="chip">Soleil (UV)</span>
+      <span class="chip">Corticoïdes au long cours</span>
+      <span class="chip">Choc sur l'œil</span>
+      <span class="chip">Forte myopie</span>
+      <span class="chip">Alcool en excès</span>
+    </div>
+    <p class="small">Plus rarement, un bébé naît avec une cataracte : on parle de cataracte congénitale.</p>
+  </div>
+
+  <!-- Volet 3 -->
+  <div class="panel w97">
+    <div class="kicker"><span class="num">03</span>Se soigner</div>
+    <h2>Diagnostic et traitement</h2>
+    <p>L'<strong>ophtalmologiste</strong> pose le diagnostic lors d'un examen simple et indolore : mesure de la vue, puis observation du cristallin au microscope (lampe à fente), après des gouttes qui dilatent la pupille.</p>
+    <div class="callout">Aucune goutte, aucune paire de lunettes ni aucun médicament ne fait disparaître une cataracte. <strong>Le seul traitement efficace est la chirurgie.</strong></div>
+
+    <h3>L'opération en 4 étapes</h3>
+    <div class="cards">
+      <div class="card">
+        <span class="n">1</span>
+        <svg viewBox="0 0 70 34" aria-hidden="true">
+          <path d="M13 21 C 22 11, 48 11, 57 21 C 48 31, 22 31, 13 21 Z" fill="#fff" stroke="#0e5a6b" stroke-width="1.4"/>
+          <circle cx="35" cy="21" r="7" fill="#3d8fa3"/>
+          <circle cx="35" cy="21" r="3.2" fill="#0b1d24"/>
+          <circle cx="35" cy="21" r="3.8" fill="#f3d9a6" opacity=".8"/>
+          <rect x="46" y="0.8" width="8" height="6.4" rx="1.6" fill="#f6e2c0" stroke="#0e5a6b" stroke-width="1.1"/>
+          <path d="M48 7.2 h4 l-1 2.8 h-2 z" fill="#fff" stroke="#0e5a6b" stroke-width="1" stroke-linejoin="round"/>
+          <path d="M50 11.6 c0 0 -1.4 1.6 -1.4 2.4 a1.4 1.4 0 0 0 2.8 0 c0 -.8 -1.4 -2.4 -1.4 -2.4 z" fill="#5fb3c4"/>
+        </svg>
+        <strong>Anesthésie locale</strong> par gouttes : on reste éveillé, sans douleur.
+      </div>
+      <div class="card">
+        <span class="n">2</span>
+        <svg viewBox="0 0 70 34" aria-hidden="true">
+          <path d="M13 21 C 22 11, 48 11, 57 21 C 48 31, 22 31, 13 21 Z" fill="#fff" stroke="#0e5a6b" stroke-width="1.4"/>
+          <circle cx="35" cy="21" r="7" fill="#3d8fa3"/>
+          <circle cx="35" cy="21" r="3.2" fill="#0b1d24"/>
+          <circle cx="35" cy="21" r="3.8" fill="#f3d9a6" opacity=".8"/>
+          <path d="M42.3 18.4 q1.3 2.6 0 5.2" fill="none" stroke="#c4473a" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M64 5 L51 14" stroke="#0e5a6b" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M51 14 L45 18.6 L49.2 12.6 Z" fill="#a9bcc2" stroke="#0e5a6b" stroke-width=".8" stroke-linejoin="round"/>
+        </svg>
+        <strong>Micro-incision</strong> de 2 à 3 mm au bord de la cornée.
+      </div>
+      <div class="card">
+        <span class="n">3</span>
+        <svg viewBox="0 0 70 34" aria-hidden="true">
+          <path d="M13 21 C 22 11, 48 11, 57 21 C 48 31, 22 31, 13 21 Z" fill="#fff" stroke="#0e5a6b" stroke-width="1.4"/>
+          <circle cx="35" cy="21" r="7" fill="#3d8fa3"/>
+          <circle cx="35" cy="21" r="3.6" fill="#0b1d24"/>
+          <g fill="#f3d9a6">
+            <path d="M33 18.6 l2 -.6 l.4 1.8 l-1.8 .6 z"/>
+            <path d="M36.2 20.6 l1.6 .2 l-.4 1.8 l-1.6 -.4 z"/>
+            <path d="M32.6 21.6 l1.6 .4 l-.6 1.6 l-1.4 -.6 z"/>
+          </g>
+          <path d="M66 9 L40 19.6" stroke="#0e5a6b" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M66 9 L58 12.3" stroke="#0e5a6b" stroke-width="3.6" stroke-linecap="round"/>
+          <g fill="none" stroke="#d08a2e" stroke-width=".9" stroke-linecap="round">
+            <path d="M43 13.5 q2.5 1.2 2 4"/>
+            <path d="M44.8 11.2 q4 2 3.2 6.2"/>
+          </g>
+        </svg>
+        Le cristallin est <strong>fragmenté par ultrasons</strong>, puis aspiré.
+      </div>
+      <div class="card">
+        <span class="n">4</span>
+        <svg viewBox="0 0 70 34" aria-hidden="true">
+          <circle cx="35" cy="18" r="9" fill="#e6f4f8" stroke="#0e5a6b" stroke-width="1.4"/>
+          <path d="M30 13.5 a6.5 6.5 0 0 1 6 -2.4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M42 12.5 C 51 7, 62 11, 59 22" fill="none" stroke="#0e5a6b" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M28 23.5 C 19 29, 8 25, 11 14" fill="none" stroke="#0e5a6b" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M55 4 v4 M53 6 h4" stroke="#d08a2e" stroke-width="1.1" stroke-linecap="round"/>
+          <path d="M14 28 v3 M12.5 29.5 h3" stroke="#d08a2e" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+        Un <strong>implant</strong>, petite lentille artificielle, le remplace pour toujours.
+      </div>
+    </div>
+
+    <div class="facts">
+      <div><b>≈ 20 min</b><span>d'intervention</span></div>
+      <div><b>Ambulatoire</b><span>retour à la maison le jour même</span></div>
+      <div><b>1 œil</b><span>à la fois, en général</span></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat" style="grid-column: span 3">
+        <b>+ de 800 000</b>
+        <span>opérations de la cataracte chaque année en France : c'est l'intervention chirurgicale la plus pratiquée.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="commun.js"></script>
+</body>
+</html>

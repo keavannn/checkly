@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Dépliant – L'otite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=block">
+<link rel="stylesheet" href="commun.css">
+<style>
+  :root {
+    --ink: #1f2440;
+    --ink-strong: #141831;
+    --muted: #575d78;
+    --primary: #2b3a7a;
+    --accent: #e0644f;
+    --accent-ink: #b9442f;
+    --accent-soft: #fbd9d0;
+    --soft: #eceff8;
+    --line: #d4d9e8;
+    --alert: #c4473a;
+    --alert-soft: #fbe9e6;
+    --alert-ink: #9b2f24;
+    --cover-bg: linear-gradient(165deg, #34479c 0%, #1c2658 100%);
+    --cover-accent: #ffc4b8;
+  }
+</style>
+</head>
+<body>
+
+<!-- Icônes (réutilisées avec <use>) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="oreille" d="M8.5 20.5 C 6.8 20.5, 6.2 18.6, 7.2 17.2 C 8.2 15.8, 6.9 14.2, 6.4 11.8 C 5.4 6.8, 8.8 3.5, 12.6 3.5 C 16.3 3.5, 19 6.3, 19 9.8 C 19 13.2, 16.4 14.2, 15.3 16.2 C 14.2 18.3, 13 20.5, 8.5 20.5 Z M10 10.5 C 10 8, 15.2 7.4, 15.2 10.2 C 15.2 12.3, 12.6 12.4, 12.6 14.2"/>
+    <symbol id="i-douleur" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <use href="#oreille" transform="translate(-3 0)" style="fill:var(--accent-soft)"/>
+      <path d="M20.5 3 l-3 5.2 h3.2 l-2.6 5.3" style="stroke:var(--accent)"/>
+    </g></symbol>
+    <symbol id="i-thermo" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 4.5 a2 2 0 0 1 4 0 v9.3 a4 4 0 1 1 -4 0 z" style="fill:#fff"/>
+      <circle cx="12" cy="17" r="2.1" style="fill:var(--accent);stroke:none"/>
+      <path d="M12 15.5 V8" style="stroke:var(--accent)"/>
+      <path d="M16.5 6h2 M16.5 9h2 M16.5 12h2" opacity=".6"/>
+    </g></symbol>
+    <symbol id="i-bouchee" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <use href="#oreille" transform="translate(-3 0)" style="fill:var(--accent-soft)"/>
+      <path d="M17.6 8.6 l4 4 M21.6 8.6 l-4 4" style="stroke:var(--accent)"/>
+    </g></symbol>
+    <symbol id="i-ecoulement" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <use href="#oreille" transform="translate(-3 0)" style="fill:var(--accent-soft)"/>
+      <path d="M19 12.5 c0 0 -2.2 2.5 -2.2 3.8 a2.2 2.2 0 0 0 4.4 0 c0 -1.3 -2.2 -3.8 -2.2 -3.8 z" style="fill:#f2c230;stroke:none"/>
+    </g></symbol>
+    <symbol id="i-bebe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="13.2" r="7.6" style="fill:var(--accent-soft)"/>
+      <path d="M12 5.6 c-1.6 -2 1.6 -3.2 1.8 -1.2"/>
+      <circle cx="9.3" cy="12.6" r=".95" style="fill:currentColor;stroke:none"/>
+      <circle cx="14.7" cy="12.6" r=".95" style="fill:currentColor;stroke:none"/>
+      <path d="M9.8 16 q2.2 1.8 4.4 0"/>
+      <circle cx="7.4" cy="15" r="1.1" style="fill:var(--accent);stroke:none" opacity=".5"/>
+      <circle cx="16.6" cy="15" r="1.1" style="fill:var(--accent);stroke:none" opacity=".5"/>
+    </g></symbol>
+    <symbol id="i-vagues" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="15.5" cy="6" r="2.2" style="fill:var(--accent-soft)"/>
+      <path d="M6.5 11 q4 -4.5 9 -2"/>
+      <path d="M3 14.5 q2.25 -2.2 4.5 0 t4.5 0 t4.5 0 t4.5 0" style="stroke:var(--accent)"/>
+      <path d="M3 19 q2.25 -2.2 4.5 0 t4.5 0 t4.5 0 t4.5 0" style="stroke:var(--accent)"/>
+    </g></symbol>
+    <symbol id="i-virus" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <circle cx="12" cy="12" r="5" style="fill:var(--accent-soft)"/>
+      <path d="M12 7 V4.6 M12 17 V19.4 M7 12 H4.6 M17 12 H19.4 M8.5 8.5 L6.8 6.8 M15.5 15.5 L17.2 17.2 M8.5 15.5 L6.8 17.2 M15.5 8.5 L17.2 6.8"/>
+      <g style="fill:currentColor;stroke:none">
+        <circle cx="12" cy="3.6" r="1.2"/><circle cx="12" cy="20.4" r="1.2"/><circle cx="3.6" cy="12" r="1.2"/><circle cx="20.4" cy="12" r="1.2"/>
+        <circle cx="6.1" cy="6.1" r="1.2"/><circle cx="17.9" cy="17.9" r="1.2"/><circle cx="6.1" cy="17.9" r="1.2"/><circle cx="17.9" cy="6.1" r="1.2"/>
+      </g>
+      <circle cx="10.6" cy="11" r="1" style="fill:var(--accent);stroke:none"/>
+      <circle cx="13.6" cy="13.4" r=".8" style="fill:var(--accent);stroke:none"/>
+    </g></symbol>
+    <symbol id="i-liquide" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3.6 13.5 q2.1 -1.4 4.2 0 t4.2 0 t4.2 0 t4.2 0 A8.5 8.5 0 0 1 3.6 13.5 Z" style="fill:#f6cf6e;stroke:none"/>
+      <circle cx="12" cy="12" r="8.5"/>
+      <path d="M3.6 13.5 q2.1 -1.4 4.2 0 t4.2 0 t4.2 0 t4.2 0" style="stroke:#c99a2e" stroke-width="1.2"/>
+    </g></symbol>
+    <symbol id="i-pilule" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+      <circle cx="10" cy="12" r="6.5" style="fill:#fff"/>
+      <path d="M5.4 16.6 L14.6 7.4"/>
+      <circle cx="18.5" cy="17.5" r="3" style="fill:var(--accent-soft)"/>
+    </g></symbol>
+    <symbol id="i-dosette" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 9 h6 v9 a3 3 0 0 1 -3 3 a3 3 0 0 1 -3 -3 z" style="fill:#e3f1f8"/>
+      <path d="M9.5 9 V6.5 h3 V9"/>
+      <path d="M9 6.5 l-.5 -3 h5 l-.5 3"/>
+      <path d="M18 7 c0 0 -1.4 1.6 -1.4 2.5 a1.4 1.4 0 0 0 2.8 0 c0 -.9 -1.4 -2.5 -1.4 -2.5 z" style="fill:#5fb3c4;stroke:none"/>
+      <path d="M19.5 13 c0 0 -1.1 1.3 -1.1 2 a1.1 1.1 0 0 0 2.2 0 c0 -.7 -1.1 -2 -1.1 -2 z" style="fill:#5fb3c4;stroke:none"/>
+    </g></symbol>
+    <symbol id="i-gelule" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <g transform="rotate(-45 12 12)">
+        <path d="M12 8.5 h4.5 a3.5 3.5 0 0 1 0 7 H12 z" style="fill:var(--accent);stroke:none"/>
+        <rect x="4" y="8.5" width="16" height="7" rx="3.5"/>
+        <path d="M12 8.5 V15.5"/>
+      </g>
+    </g></symbol>
+    <symbol id="i-gouttes" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <rect x="8.5" y="2.5" width="7" height="9" rx="1.8" style="fill:var(--accent-soft)"/>
+      <path d="M10 11.5 h4 l-1.2 3 h-1.6 z"/>
+      <path d="M12 17 c0 0 -2.1 2.4 -2.1 3.6 a2.1 2.1 0 0 0 4.2 0 c0 -1.2 -2.1 -3.6 -2.1 -3.6 z" style="fill:var(--accent);stroke:none"/>
+    </g></symbol>
+    <symbol id="i-savon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7">
+      <rect x="3.5" y="11" width="13" height="8.5" rx="3" style="fill:var(--accent-soft)"/>
+      <circle cx="17" cy="6.5" r="2.7"/>
+      <circle cx="11.3" cy="5.2" r="1.6"/>
+      <circle cx="20.4" cy="12" r="1.4"/>
+    </g></symbol>
+    <symbol id="i-tabac" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="12" width="14" height="3.4" rx=".6" style="fill:#fff"/>
+      <rect x="17" y="12" width="4" height="3.4" rx=".6" style="fill:var(--accent)"/>
+      <path d="M17.5 9 c0 -1.4 1.4 -1.4 1.4 -2.8 s-1.4 -1.4 -1.4 -2.8" opacity=".55"/>
+      <path d="M3.5 4 L20.5 21" style="stroke:var(--alert)"/>
+    </g></symbol>
+    <symbol id="i-seringue" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <g transform="rotate(45 12 12)">
+        <rect x="9.5" y="6" width="5" height="10" rx="1" style="fill:var(--accent-soft)"/>
+        <path d="M12 16 V21.5"/>
+        <path d="M12 6 V3 M9.8 3 h4.4"/>
+        <path d="M8 6 h8"/>
+        <path d="M9.5 9 h2 M9.5 11.5 h2 M9.5 14 h2" opacity=".6"/>
+      </g>
+    </g></symbol>
+    <symbol id="i-coeur" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+      <path d="M12 20 C 5 15, 3 11.2, 3 8.6 C 3 6, 5 4, 7.5 4 C 9.5 4, 11 5.4, 12 7 C 13 5.4, 14.5 4, 16.5 4 C 19 4, 21 6, 21 8.6 C 21 11.2, 19 15, 12 20 Z" style="fill:var(--accent-soft)"/>
+    </g></symbol>
+    <symbol id="i-serviette" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 5 h18"/>
+      <path d="M6 5 v14 a1.5 1.5 0 0 0 1.5 1.5 h9 a1.5 1.5 0 0 0 1.5 -1.5 V5" style="fill:var(--accent-soft)"/>
+      <path d="M6 14.5 h12 M6 17 h12" style="stroke:var(--accent)"/>
+    </g></symbol>
+  </defs>
+</svg>
+
+<!-- ================= RECTO (extérieur) : rabat | dos | couverture ================= -->
+<section class="sheet">
+
+  <!-- Rabat : on le voit en ouvrant la couverture -->
+  <div class="panel w97">
+    <div class="kicker"><span class="num">?</span>Idées reçues</div>
+    <h2>Vrai ou faux ?</h2>
+    <p class="lead">Testez ce que vous savez sur l'otite.</p>
+
+    <div class="vf">
+      <q>L'otite est contagieuse.</q>
+      <p><span class="verdict">Faux</span>L'otite ne s'attrape pas. En revanche, le <strong>rhume</strong> qui la provoque, lui, est contagieux.</p>
+    </div>
+    <div class="vf">
+      <q>Une otite se soigne toujours avec des antibiotiques.</q>
+      <p><span class="verdict">Faux</span>Beaucoup guérissent seules : c'est le médecin qui décide s'il en faut.</p>
+    </div>
+    <div class="vf">
+      <q>Le coton-tige protège les oreilles.</q>
+      <p><span class="verdict">Faux</span>Il pousse le cérumen au fond et peut blesser le tympan. On nettoie seulement l'entrée de l'oreille.</p>
+    </div>
+    <div class="vf">
+      <q>Une otite peut rendre sourd.</q>
+      <p><span class="verdict nuance">Rarement</span>La baisse d'audition est presque toujours passagère. Des otites à répétition doivent être suivies par un médecin.</p>
+    </div>
+    <div class="vf">
+      <q>On peut prendre l'avion avec une otite.</q>
+      <p><span class="verdict nuance">À éviter</span>Les changements de pression peuvent rendre la douleur très forte : demandez l'avis du médecin.</p>
+    </div>
+    <div class="vf">
+      <q>Si l'oreille coule, c'est très grave.</q>
+      <p><span class="verdict nuance">Pas forcément</span>Le tympan s'est percé pour laisser sortir le pus. Il cicatrise en général seul, mais il faut consulter.</p>
+    </div>
+
+    <div class="fact">
+      <svg viewBox="0 0 60 54" role="img" aria-label="Un tambour">
+        <g fill="none" stroke="#e0644f" stroke-width="1.4" stroke-linecap="round">
+          <path d="M5 20 q-3 -4 0 -8"/>
+          <path d="M55 20 q3 -4 0 -8"/>
+        </g>
+        <g stroke="#2b3a7a" stroke-width="1.6" stroke-linejoin="round">
+          <path d="M8 24 V40 A22 7 0 0 0 52 40 V24" fill="#e0644f"/>
+          <path d="M9 27 L15 40 L21 29 L27 42 L33 29 L39 42 L45 29 L51 39" fill="none" stroke="#fff" stroke-width="1.1"/>
+          <path d="M8 40 A22 7 0 0 0 52 40" fill="none"/>
+          <ellipse cx="30" cy="24" rx="22" ry="7" fill="#fbf3e6"/>
+          <path d="M17 5 L29 20" stroke-width="2" stroke-linecap="round"/>
+          <path d="M45 6 L35 20" stroke-width="2" stroke-linecap="round"/>
+        </g>
+        <circle cx="16" cy="4" r="2.4" fill="#2b3a7a"/>
+        <circle cx="46" cy="5" r="2.4" fill="#2b3a7a"/>
+      </svg>
+      <div>
+        <span class="t">Le saviez-vous ?</span>
+        « Tympan » vient du grec <em>tympanon</em>, le tambour : comme la peau d'un tambour, il vibre quand les sons l'atteignent.
+      </div>
+    </div>
+  </div>
+
+  <!-- Dos : visible quand le dépliant est fermé, au verso -->
+  <div class="panel w100">
+    <div class="kicker"><span class="num">04</span>Prévenir</div>
+    <h2>Limiter le risque d'otite</h2>
+    <ul class="icons">
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-dosette"/></svg></span><span><strong>Laver le nez</strong> des tout-petits au sérum physiologique et apprendre aux enfants à se moucher.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-savon"/></svg></span><span>Se <strong>laver les mains</strong> souvent, surtout pendant la saison des rhumes.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-tabac"/></svg></span><span><strong>Ne pas fumer</strong> près des enfants : le tabagisme passif favorise les otites.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-seringue"/></svg></span><span>Faire les <strong>vaccins</strong> : celui contre le pneumocoque, obligatoire chez le nourrisson, protège contre une partie des otites.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-coeur"/></svg></span><span>L'<strong>allaitement</strong> aide à protéger les bébés.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-serviette"/></svg></span><span>Après la baignade, bien <strong>sécher l'entrée des oreilles</strong>, sans coton-tige.</span></li>
+    </ul>
+
+    <div class="alert">
+      <div class="t">Consultez rapidement si…</div>
+      <ul class="list">
+        <li>la fièvre dure plus de 48 h ou reste forte malgré le traitement ;</li>
+        <li>la douleur est très forte ou l'oreille coule ;</li>
+        <li>la zone derrière l'oreille est rouge ou gonflée ;</li>
+        <li>l'enfant est très abattu, a des vertiges ou la nuque raide ;</li>
+        <li>un bébé de moins de 3 mois a de la fièvre.</li>
+      </ul>
+    </div>
+    <p class="small">En cas d'urgence, appelez le <strong>15</strong> (Samu) ou le <strong>112</strong>.</p>
+
+    <div class="footer">
+      <p><strong>Sources :</strong> Assurance Maladie (ameli.fr), Haute Autorité de santé (HAS).</p>
+      <p>Ce dépliant informe : il ne remplace pas l'avis d'un médecin.</p>
+      <div class="by">Réalisé par : <span></span></div>
+    </div>
+  </div>
+
+  <!-- Couverture -->
+  <div class="panel w100 cover">
+    <div class="eyebrow">Santé ORL · Dépliant d'information</div>
+    <div class="art">
+      <svg viewBox="0 0 240 180" role="img" aria-label="Une oreille enflammée et des ondes sonores">
+        <defs>
+          <radialGradient id="cvGlow">
+            <stop offset="0" stop-color="#ff6b4f" stop-opacity=".9"/>
+            <stop offset=".5" stop-color="#ff7a5c" stop-opacity=".45"/>
+            <stop offset="1" stop-color="#ff7a5c" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <g fill="none" stroke="#fff" stroke-opacity=".08">
+          <circle cx="132" cy="96" r="84"/>
+          <circle cx="132" cy="96" r="64"/>
+        </g>
+        <g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round">
+          <path d="M97.2 119.5 A34 34 0 0 1 97.2 80.5" stroke-opacity=".85"/>
+          <path d="M84 128.7 A50 50 0 0 1 84 71.3" stroke-opacity=".55"/>
+          <path d="M71 137.9 A66 66 0 0 1 71 62.1" stroke-opacity=".3"/>
+        </g>
+        <path transform="translate(3 4)" d="M120 40 C 140 14, 190 18, 192 66 C 194 98, 170 110, 162 128 C 154 146, 158 168, 136 170 C 116 172, 110 156, 116 142 C 120 132, 112 124, 108 116 C 102 100, 104 60, 120 40 Z" fill="#000" opacity=".18"/>
+        <path d="M120 40 C 140 14, 190 18, 192 66 C 194 98, 170 110, 162 128 C 154 146, 158 168, 136 170 C 116 172, 110 156, 116 142 C 120 132, 112 124, 108 116 C 102 100, 104 60, 120 40 Z" fill="#f6d3bd" stroke="#c58d72" stroke-width="2"/>
+        <g fill="none" stroke="#c58d72" stroke-linecap="round">
+          <path d="M124 50 C 140 32, 178 36, 180 66 C 182 92, 160 104, 152 122" stroke-width="2.2"/>
+          <path d="M132 62 C 150 56, 164 70, 160 86 C 157 98, 146 104, 142 116" stroke-width="2"/>
+          <path d="M140 60 C 146 50, 160 48, 166 56" stroke-width="1.6"/>
+          <path d="M126 150 C 132 156, 140 156, 146 150" stroke-width="1.4" stroke-opacity=".6"/>
+        </g>
+        <path d="M120 92 C 120 78, 138 76, 146 88 C 152 98, 148 114, 136 116 C 126 118, 120 106, 120 92 Z" fill="#eab196"/>
+        <circle cx="126" cy="100" r="24" fill="url(#cvGlow)"/>
+        <ellipse cx="126" cy="100" rx="5" ry="7" fill="#7a3b2e"/>
+        <path d="M112 95 C 119 93, 121 104, 114 110" fill="#f0c0a4" stroke="#c58d72" stroke-width="1.5"/>
+        <g stroke="#ffb5a5" stroke-width="2.4" stroke-linecap="round">
+          <path d="M204 44 L214 36"/>
+          <path d="M208 60 L220 58"/>
+          <path d="M196 32 L200 20"/>
+        </g>
+      </svg>
+    </div>
+    <h1>L'otite</h1>
+    <p class="sub">Quand l'oreille s'enflamme : comprendre, soulager et prévenir.</p>
+    <div class="tags">
+      <span class="tag">Définition</span>
+      <span class="tag">Symptômes</span>
+      <span class="tag">Traitement</span>
+      <span class="tag">Prévention</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VERSO (intérieur) : 3 volets, de gauche à droite ================= -->
+<section class="sheet">
+
+  <!-- Volet 1 -->
+  <div class="panel w100">
+    <div class="kicker"><span class="num">01</span>Comprendre</div>
+    <h2>Qu'est-ce qu'une otite ?</h2>
+    <p>C'est une <strong>inflammation de l'oreille</strong>, le plus souvent causée par un virus ou une bactérie. L'oreille se divise en trois parties :</p>
+
+    <figure class="figure">
+      <svg viewBox="0 0 240 162" role="img" aria-label="Schéma de l'oreille : externe, moyenne et interne">
+        <g>
+          <rect x="2" y="2" width="104" height="11" rx="5.5" fill="#fbe3dd"/>
+          <rect x="108" y="2" width="44" height="11" rx="5.5" fill="#fff0c9"/>
+          <rect x="154" y="2" width="84" height="11" rx="5.5" fill="#e3e8f6"/>
+        </g>
+        <g font-size="6.4" font-weight="700" letter-spacing=".6" text-anchor="middle" fill="#2b3a7a">
+          <text x="54" y="9.8">EXTERNE</text>
+          <text x="130" y="9.8">MOYENNE</text>
+          <text x="196" y="9.8">INTERNE</text>
+        </g>
+        <rect x="58" y="20" width="182" height="142" rx="8" fill="#f2e8db"/>
+        <path d="M59 64 C 50 46, 38 26, 24 26 C 10 26, 4 44, 6 64 C 8 90, 14 112, 26 128 C 34 140, 50 142, 59 130 L 59 94 C 46 100, 34 100, 30 88 C 24 72, 24 52, 30 44 C 36 38, 46 50, 59 64 Z" fill="#f6d3bd" stroke="#c58d72" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M48 46 C 40 34, 26 30, 17 40 C 11 50, 12 78, 18 100 C 22 114, 30 124, 40 128" fill="none" stroke="#c58d72" stroke-width="1.1" stroke-linecap="round" opacity=".7"/>
+        <path d="M56 67 C 72 65, 92 69, 106 66 L 106 91 C 92 88, 72 92, 56 89 Z" fill="#fff" stroke="#d9c6b0"/>
+        <path d="M110 50 C 110 44, 116 42, 124 42 L 140 42 C 148 42, 152 48, 152 56 L 152 96 C 152 104, 146 106, 140 106 L 124 106 C 116 106, 110 102, 110 96 Z" fill="#fff" stroke="#d9c6b0"/>
+        <path d="M110 86 L 152 86 L 152 96 C 152 104, 146 106, 140 106 L 124 106 C 116 106, 110 102, 110 96 Z" fill="#f6cf6e" opacity=".85"/>
+        <path d="M121 104 C 126 124, 150 140, 174 162 L 190 162 C 162 136, 142 122, 138 104 Z" fill="#fff" stroke="#d9c6b0"/>
+        <path d="M105 60 L 110 97" stroke="#e0644f" stroke-width="2.8" stroke-linecap="round"/>
+        <g stroke="#a3795a" stroke-linecap="round" fill="#a3795a">
+          <path d="M108.5 80 L 117 58" stroke-width="3"/>
+          <circle cx="119" cy="54" r="4.4" stroke="none"/>
+          <circle cx="126.5" cy="55" r="3.8" stroke="none"/>
+          <path d="M127 58 L 133 71" stroke-width="2.8"/>
+          <path d="M134 72 L 147 66 M134 72 L 147 78" stroke-width="1.8" fill="none"/>
+          <path d="M148.5 63 L 148.5 81" stroke-width="2.6"/>
+        </g>
+        <g fill="none" stroke="#6f8fb5" stroke-linecap="round">
+          <ellipse cx="160" cy="42" rx="6.5" ry="12" stroke-width="3.2"/>
+          <ellipse cx="174" cy="52" rx="11" ry="6.5" stroke-width="3.2"/>
+          <ellipse cx="170" cy="38" rx="10" ry="5.5" transform="rotate(-40 170 38)" stroke-width="3.2"/>
+          <path d="M163 72 C 167 80, 170 86, 172 92" stroke-width="4.2"/>
+          <path d="M172 92 a14 14 0 0 1 28 0 a11 11 0 0 1 -22 0 a8 8 0 0 1 16 0 a5 5 0 0 1 -10 0" stroke-width="4.2"/>
+        </g>
+        <ellipse cx="160" cy="67" rx="7.5" ry="7" fill="#d3e0f1" stroke="#6f8fb5" stroke-width="1.4"/>
+        <path d="M200 82 C 210 78, 222 74, 238 72 L 238 84 C 222 84, 210 88, 200 92 Z" fill="#f3ddb0" stroke="#d2ad6a"/>
+        <g stroke="#7f8796" stroke-width=".6" fill="none">
+          <path d="M22 145 L 30 132"/>
+          <path d="M96 33 L 105 58"/>
+          <path d="M134 30 L 124 48"/>
+          <path d="M193 37 L 182 47"/>
+        </g>
+        <g font-size="7.4" fill="#1f2440" font-weight="600">
+          <text x="22" y="153" text-anchor="middle">Pavillon</text>
+          <text x="85" y="104" text-anchor="middle">Conduit auditif</text>
+          <text x="94" y="30" text-anchor="middle">Tympan</text>
+          <text x="134" y="27" text-anchor="middle">Osselets</text>
+          <text x="131" y="101" text-anchor="middle" font-size="6.4" fill="#7a5600">pus</text>
+          <text x="143" y="140" text-anchor="end">Trompe d'Eustache</text>
+          <text x="143" y="148" text-anchor="end" font-weight="400" font-style="italic" font-size="6.6">vers le nez et la gorge</text>
+          <text x="195" y="33">Équilibre</text>
+          <text x="186" y="121" text-anchor="middle">Cochlée</text>
+          <text x="236" y="101" text-anchor="end">Nerf auditif</text>
+        </g>
+      </svg>
+      <figcaption class="caption">En jaune : le pus qui s'accumule derrière le tympan lors d'une otite moyenne aiguë.</figcaption>
+    </figure>
+
+    <h3>Les 3 otites les plus courantes</h3>
+    <div class="types">
+      <div class="type has-ico"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-vagues"/></svg></span><div><b>Otite externe</b>Le <strong>conduit auditif</strong> est enflammé, souvent après la baignade : c'est « l'otite du baigneur ». Tirer sur l'oreille réveille la douleur.</div></div>
+      <div class="type has-ico"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-virus"/></svg></span><div><b>Otite moyenne aiguë</b>La plus fréquente chez l'enfant. Du <strong>pus</strong> s'accumule derrière le tympan, souvent après un rhume.</div></div>
+      <div class="type has-ico"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-liquide"/></svg></span><div><b>Otite séromuqueuse</b>Du <strong>liquide</strong> reste derrière le tympan, sans douleur ni fièvre, mais l'enfant entend moins bien.</div></div>
+    </div>
+  </div>
+
+  <!-- Volet 2 -->
+  <div class="panel w100">
+    <div class="kicker"><span class="num">02</span>Reconnaître</div>
+    <h2>Pourquoi surtout les enfants ?</h2>
+    <p>Avant 2 ans, <strong>3 enfants sur 4</strong> ont déjà fait au moins une otite moyenne aiguë.</p>
+    <p>L'oreille communique avec l'arrière du nez par un petit canal : la <strong>trompe d'Eustache</strong>. Chez l'enfant, elle est <strong>plus courte et plus horizontale</strong>. Pendant un rhume, les microbes remontent donc facilement jusqu'à l'oreille.</p>
+
+    <figure class="figure">
+      <svg viewBox="0 0 220 80" role="img" aria-label="Trompe d'Eustache chez l'adulte et chez l'enfant">
+        <rect x="0" y="0" width="104" height="62" rx="6" fill="#eceff8"/>
+        <circle cx="18" cy="15" r="8" fill="#fff" stroke="#2b3a7a" stroke-width="1.4"/>
+        <path d="M14.5 15 a3.5 3.5 0 0 1 7 0 a2.5 2.5 0 0 1 -5 0" fill="none" stroke="#2b3a7a" stroke-width="1"/>
+        <path d="M24 21 C 38 28, 52 38, 66 48" fill="none" stroke="#2b3a7a" stroke-width="4.5" stroke-linecap="round"/>
+        <rect x="62" y="45" width="38" height="13" rx="4" fill="#fff" stroke="#2b3a7a" stroke-width="1"/>
+        <rect x="116" y="0" width="104" height="62" rx="6" fill="#eceff8"/>
+        <circle cx="136" cy="25" r="8" fill="#fff" stroke="#2b3a7a" stroke-width="1.4"/>
+        <path d="M132.5 25 a3.5 3.5 0 0 1 7 0 a2.5 2.5 0 0 1 -5 0" fill="none" stroke="#2b3a7a" stroke-width="1"/>
+        <path d="M144 27 C 156 28, 166 29, 178 30" fill="none" stroke="#2b3a7a" stroke-width="4.5" stroke-linecap="round"/>
+        <rect x="176" y="23.5" width="34" height="13" rx="4" fill="#fff" stroke="#2b3a7a" stroke-width="1"/>
+        <g fill="#e0644f">
+          <circle cx="152" cy="27.6" r="1.8"/>
+          <circle cx="160.5" cy="28.4" r="1.8"/>
+          <circle cx="169" cy="29.2" r="1.8"/>
+          <path d="M149 18 l5 -2.6 l-.4 5.2 z"/>
+        </g>
+        <path d="M172 19.5 C 166 18.4, 160 18, 153 18.2" fill="none" stroke="#e0644f" stroke-width="1.1"/>
+        <g font-size="6.4" fill="#1f2440" text-anchor="middle">
+          <text x="18" y="32">oreille</text>
+          <text x="84" y="53.8">nez / gorge</text>
+          <text x="136" y="42">oreille</text>
+          <text x="193" y="32.3">nez / gorge</text>
+          <text x="161" y="13" fill="#b9442f" font-style="italic">microbes</text>
+        </g>
+        <g font-size="7.2" fill="#2b3a7a" text-anchor="middle">
+          <text x="52" y="73"><tspan font-weight="700">Adulte :</tspan> longue et inclinée</text>
+          <text x="168" y="73"><tspan font-weight="700">Enfant :</tspan> courte et horizontale</text>
+        </g>
+      </svg>
+    </figure>
+
+    <p>La crèche, l'école et le tabagisme passif augmentent aussi le risque.</p>
+
+    <h3>Les signes</h3>
+    <div class="tiles row">
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-douleur"/></svg></span><div><b>Douleur d'oreille</b>parfois très vive, souvent la nuit</div></div>
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-thermo"/></svg></span><div><b>Fièvre</b>fréquente chez l'enfant</div></div>
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-bouchee"/></svg></span><div><b>Oreille bouchée</b>on entend moins bien</div></div>
+      <div class="tile"><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-ecoulement"/></svg></span><div><b>Écoulement</b>parfois du pus sort de l'oreille</div></div>
+    </div>
+    <div class="callout has-ico">
+      <span class="ico lg"><svg viewBox="0 0 24 24"><use href="#i-bebe"/></svg></span>
+      <div><strong>Chez le bébé</strong>, qui ne peut pas le dire : pleurs, mauvais sommeil. Il se frotte ou se tire l'oreille, refuse de manger, a parfois des vomissements ou de la diarrhée.</div>
+    </div>
+  </div>
+
+  <!-- Volet 3 -->
+  <div class="panel w97">
+    <div class="kicker"><span class="num">03</span>Se soigner</div>
+    <h2>Diagnostic et traitement</h2>
+    <div class="media">
+      <p>Le médecin regarde le tympan avec un <strong>otoscope</strong>, une petite lampe munie d'un embout. L'examen est rapide et ne fait pas mal. Un tympan rouge et bombé signe une otite moyenne aiguë.</p>
+      <svg viewBox="-8 0 48 64" role="img" aria-label="Un otoscope">
+        <path d="M4 19 L-7 12 L-7 30 L4 23 Z" fill="#ffd9a0" opacity=".75"/>
+        <path d="M18 16 L4 19 L4 23 L18 26 Z" fill="#fff" stroke="#2b3a7a" stroke-width="1.5" stroke-linejoin="round"/>
+        <rect x="17" y="12" width="20" height="18" rx="5" fill="#dfe3f3" stroke="#2b3a7a" stroke-width="1.5"/>
+        <circle cx="30.5" cy="21" r="3.6" fill="#fff" stroke="#2b3a7a" stroke-width="1.2"/>
+        <rect x="21" y="29" width="12" height="4" rx="1.5" fill="#e0644f"/>
+        <rect x="22" y="32" width="10" height="30" rx="3" fill="#2b3a7a"/>
+        <path d="M24.5 38 h5 M24.5 42 h5 M24.5 46 h5 M24.5 50 h5" stroke="#8d9ad0" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <ul class="icons">
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-pilule"/></svg></span><span><strong>Calmer la douleur et la fièvre</strong> avec du paracétamol, à la dose adaptée au poids de l'enfant.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-dosette"/></svg></span><span><strong>Laver le nez</strong> au sérum physiologique et bien se moucher.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-gelule"/></svg></span><span><strong>Antibiotiques : pas systématiques.</strong> Le médecin en prescrit surtout avant 2 ans ou si les signes sont forts, le plus souvent de l'amoxicilline. Après 2 ans, si les signes sont légers, il peut proposer d'attendre 48 à 72 h.</span></li>
+      <li><span class="ico"><svg viewBox="0 0 24 24"><use href="#i-gouttes"/></svg></span><span><strong>Otite externe :</strong> des gouttes à mettre dans l'oreille, sur ordonnance.</span></li>
+    </ul>
+
+    <div class="facts two">
+      <div><b>8 sur 10</b><span>otites moyennes guérissent sans antibiotique</span></div>
+      <div><b>2 à 3 jours</b><span>en général pour que la douleur passe</span></div>
+    </div>
+
+    <div class="alert">
+      <div class="t">Attention</div>
+      Pas de gouttes dans l'oreille sans avis médical : si le tympan est percé, certaines sont dangereuses. Un antibiotique prescrit se prend <strong>jusqu'au bout</strong>, même si ça va mieux.
+    </div>
+
+    <h3>Les complications</h3>
+    <p>Elles sont rares quand l'otite est bien suivie : perforation du tympan, otites à répétition, baisse d'audition qui dure, ou infection de l'os derrière l'oreille (mastoïdite).</p>
+  </div>
+</section>
+
+<script src="commun.js"></script>
+</body>
+</html>

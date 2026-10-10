@@ -4,8 +4,61 @@
     {
       "name": "cheeklyy-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "cheeklyy-prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "next",
+        "start",
+        "-p",
+        "3001"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "agence-pizzagogo",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Dev/agence-sites/scripts/dev.mjs",
+        "pizzagogo-cournonterral",
+        "--port",
+        "4321"
+      ],
+      "port": 4321
+    },
+    {
+      "name": "agence-bellagio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Dev/agence-sites/scripts/dev.mjs",
+        "le-bellagio-juvignac",
+        "--port",
+        "4322"
+      ],
+      "port": 4322
+    },
+    {
+      "name": "enquete-rotterdam",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/keava/AppData/Local/Temp/claude/C--Dev-cheeklyy/7e332e1a-171f-460e-858c-3dabba191bf5/scratchpad/serveur.mjs",
+        "5500"
+      ],
+      "port": 5500
+    },
+    {
+      "name": "agence-console",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Dev/agence-sites/scripts/console.mjs"
+      ],
+      "port": 4400
     }
   ]
 }
