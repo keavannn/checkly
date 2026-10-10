@@ -1,0 +1,9 @@
+Photos from Unsplash (https://unsplash.com), used under the Unsplash License (free for commercial use, no attribution required).
+Illustrative only: they show no Checkly customer and no hotel that uses Checkly.
+Source image ids (images.unsplash.com/photo-<id>):
+lobby-counter.jpg          1758448500688-3ababa93fd67
+lobby-lounge.jpg           1782890790046-2aefb0b503cb
+guests-arriving.jpg        1782714084014-3c1b362ee256
+breakfast-tray.jpg         1596701062351-8c2c14d1fdd0
+housekeeping-corridor.jpg  1580256081112-e49377338b7f
+Downloaded 2026-10-10 at w=2000, q=78.

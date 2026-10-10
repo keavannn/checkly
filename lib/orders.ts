@@ -44,12 +44,12 @@ function writeOrders(orders: Order[]) {
   notify();
 }
 
-export function addOrder(articles: OrderItem[], total: number, kind: OrderKind = "cuisine", statut: OrderStatus = "nouveau", paid = false): Order {
+export function addOrder(articles: OrderItem[], total: number, kind: OrderKind = "cuisine", statut: OrderStatus = "nouveau", paid = false, who?: { chambre: number; client: string }): Order {
   const config = readConfig();
   const order: Order = {
     id: Date.now(),
-    chambre: config.room,
-    client: guestFullName(config),
+    chambre: who?.chambre ?? config.room,
+    client: who?.client ?? guestFullName(config),
     articles,
     total,
     heure: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),

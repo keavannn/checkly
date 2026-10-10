@@ -1,33 +1,21 @@
-import Link from "next/link";
-import "./demo.css";
-import DemoControls from "@/components/DemoControls";
+import type { Metadata } from "next";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import "./presentation.css";
+import Presentation from "@/components/presentation/Presentation";
+import { siteCopy } from "@/lib/i18n/presentation";
+
+const display = Bricolage_Grotesque({ variable: "--font-display", subsets: ["latin"], display: "swap" });
+const body = Figtree({ variable: "--font-body", subsets: ["latin"], display: "swap" });
+
+export const metadata: Metadata = {
+  title: siteCopy.fr.meta.title,
+  description: siteCopy.fr.meta.description,
+};
 
 export default function Home() {
   return (
-    <div className="demo-shell">
-      <div className="demo-brand">
-        <strong>CHECKLY</strong>
-        <i />
-        <span>SUITE DIGITALE HÔTELIÈRE — DÉMONSTRATION</span>
-      </div>
-      <div className="demo-cards">
-        <Link className="demo-card" href="/borne">
-          <span className="demo-icon">🏨</span>
-          <strong>Borne Check-in</strong>
-          <small>Accueil, réservation, paiement</small>
-        </Link>
-        <Link className="demo-card" href="/tablette">
-          <span className="demo-icon">📱</span>
-          <strong>Tablette Chambre</strong>
-          <small>Restauration, services, séjour</small>
-        </Link>
-        <Link className="demo-card" href="/dashboard-cuisine">
-          <span className="demo-icon">👨‍🍳</span>
-          <strong>Dashboard Cuisine</strong>
-          <small>Commandes en temps réel</small>
-        </Link>
-      </div>
-      <DemoControls />
+    <div className={`${display.variable} ${body.variable}`}>
+      <Presentation />
     </div>
   );
 }

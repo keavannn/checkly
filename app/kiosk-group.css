@@ -1,0 +1,25 @@
+/* Group check-in screens (simulated group booking): one payer, several rooms. Sizes follow the kiosk canvas (cqw). */
+.group-screen { position: absolute; inset: 0; text-align: center; }
+.group-screen:has(.success-mark) .success-mark { top: 11.5%; }
+.group-screen:has(.success-mark) .screen-heading { top: 19.5%; }
+.group-screen > .figma-button { position: absolute; bottom: 10%; left: 50%; translate: -50% 0; }
+
+.group-list { position: absolute; top: 40%; left: 17%; width: 66%; display: grid; gap: .9cqw; }
+.group-room { display: grid; grid-template-columns: 6.5cqw 1fr auto; align-items: center; gap: 1.4cqw; padding: 1.1cqw 2cqw; border: 1px solid var(--gold); border-radius: 1cqw; background: #fffdfa; text-align: left; }
+.group-room b { font: 400 2.6cqw 'Playfair Display'; color: var(--brown); }
+.group-room strong { display: block; font: 400 1.5cqw 'Playfair Display'; color: var(--ink); }
+.group-room small { display: block; margin-top: .25cqw; color: var(--muted); font-size: .95cqw; letter-spacing: .04em; }
+.group-ready { padding: .35cqw 1cqw; border: 1px solid #bcdcc7; border-radius: 99px; background: #f0f8f3; color: #2f7a4f; font-size: .9cqw; font-weight: 500; }
+
+.group-pay { position: absolute; top: 30%; left: 22%; width: 56%; padding: 1.5cqw 2.4cqw; border: 1px solid var(--gold); border-radius: 1cqw; background: #fffdfa; text-align: left; }
+.group-payer { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 1.2cqw; padding-bottom: 1cqw; border-bottom: 1px solid var(--border); }
+.group-payer small { color: var(--gold); font-size: .85cqw; letter-spacing: .12em; }
+.group-payer strong { font: 400 1.9cqw 'Playfair Display'; color: var(--ink); }
+.group-payer span { color: var(--brown); font-size: 1.05cqw; }
+.group-line { display: flex; justify-content: space-between; align-items: baseline; padding: .8cqw 0; border-bottom: 1px solid #ece4d6; color: var(--muted); font-size: 1.1cqw; }
+.group-line b { color: var(--brown); font-weight: 500; }
+.group-total { padding-top: 1.1cqw; border-bottom: 0; color: var(--ink); font: 400 1.6cqw 'Playfair Display'; }
+.group-total b { font: 400 1.9cqw 'Playfair Display'; color: var(--brown); }
+
+.group-link { position: absolute; bottom: 10.5%; left: 50%; transform: translateX(-50%); padding: .7cqw 1.8cqw; border: 1px solid var(--gold); border-radius: 99px; background: transparent; color: var(--brown); font-size: 1.05cqw; letter-spacing: .05em; white-space: nowrap; cursor: pointer; transition: background-color .18s ease; }
+.group-link:hover { background: #f3eee4; }

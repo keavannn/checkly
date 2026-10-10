@@ -9,6 +9,8 @@ import {
 } from "@/lib/orders";
 import { useChatMessages, sendChatMessage, getRoomConversations, seedDemoChats } from "@/lib/chat";
 import type { ApaleoArrival } from "@/lib/apaleo";
+import { languageOptions, type Lang } from "@/lib/i18n";
+import { dashboardCopy, translateOrderName, type DashCopy } from "@/lib/i18n/dashboard";
 
 function playBeep() {
   try {
@@ -29,33 +31,30 @@ function minutesAgo(timestamp: number, now: number) {
   return Math.max(0, Math.round((now - timestamp) / 60000));
 }
 
-function relativeDayLabel(iso: string): string {
+function clockTime(date: Date | number, locale: string) {
+  return new Date(date).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
+function relativeDayLabel(iso: string, t: DashCopy): string {
   const d = new Date(iso);
   const now = new Date();
   const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
   const diffDays = Math.round((startOfDay(d) - startOfDay(now)) / 86400000);
-  const time = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-  if (diffDays === 0) return `Aujourd'hui · ${time}`;
-  if (diffDays === 1) return `Demain · ${time}`;
-  if (diffDays === -1) return `Hier · ${time}`;
-  if (diffDays > 1) return `Dans ${diffDays} jours · ${time}`;
-  return `Il y a ${Math.abs(diffDays)} jours`;
+  return t.relDay(diffDays, clockTime(d, t.locale));
+}
+
+const LANG_KEY = "checkly_dashboard_lang";
+function readStoredLang(): Lang {
+  try {
+    const stored = localStorage.getItem(LANG_KEY);
+    if (stored && languageOptions.some((o) => o.code === stored)) return stored as Lang;
+  } catch { /* storage unavailable */ }
+  return "fr";
 }
 
 const PERIOD_MS: Record<"jour" | "semaine" | "mois", number> = { jour: 24 * 60 * 60 * 1000, semaine: 7 * 24 * 60 * 60 * 1000, mois: 30 * 24 * 60 * 60 * 1000 };
 const RECENT_DONE_LIMIT = 4;
 const NOTICE_LABELS = new Set(["Ne pas déranger", "Fin du mode Ne pas déranger"]);
-
-const QUICK_REPLIES = [
-  "Bien sûr, nous nous en occupons tout de suite.",
-  "Un instant, je reviens vers vous très vite.",
-  "Nous envoyons quelqu'un dans votre chambre immédiatement.",
-  "Toutes nos excuses pour la gêne occasionnée.",
-  "Le petit-déjeuner est servi jusqu'à 10h30 en salle.",
-  "Le spa est ouvert de 9h à 20h, sur réservation.",
-  "C'est noté, merci de votre message.",
-  "N'hésitez pas si vous avez besoin d'autre chose 🙏",
-];
 
 function mergeArticles(articles: OrderItem[]): OrderItem[] {
   const map = new Map<string, OrderItem>();
@@ -67,7 +66,9 @@ function mergeArticles(articles: OrderItem[]): OrderItem[] {
   return [...map.values()];
 }
 
-function RoomCard({ room, currency }: { room: { chambre: number; client: string; orders: Order[] }; currency: string }) {
+type Tr = { t: DashCopy; lang: Lang };
+
+function RoomCard({ room, currency, t, lang }: { room: { chambre: number; client: string; orders: Order[] }; currency: string } & Tr) {
   const [expanded, setExpanded] = useState(false);
   const active = room.orders.filter((o) => o.statut !== "livre").length;
   const lateCheckout = room.orders.some((o) => o.articles.some((a) => a.nom.startsWith("Late check-out")));
@@ -75,55 +76,53 @@ function RoomCard({ room, currency }: { room: { chambre: number; client: string;
   const itemCount = room.orders.reduce((s, o) => s + o.articles.reduce((s2, a) => s2 + a.qty, 0), 0);
   const sortedOrders = [...room.orders].sort((a, b) => b.timestamp - a.timestamp);
   return <div className="dash-card">
-    <div className="dash-card-top"><strong>Chambre {room.chambre}</strong><span>{active} en cours</span></div>
-    <div className="dash-room">{room.client}{lateCheckout && " · ◷ Late check-out"}</div>
-    <div className="dash-room-summary">{room.orders.length} commande{room.orders.length > 1 ? "s" : ""} · {itemCount} article{itemCount > 1 ? "s" : ""}</div>
+    <div className="dash-card-top"><strong>{t.room(room.chambre)}</strong><span>{t.activeCount(active)}</span></div>
+    <div className="dash-room">{room.client}{lateCheckout && ` · ◷ ${t.lateCheckoutTag}`}</div>
+    <div className="dash-room-summary">{t.ordersItems(room.orders.length, itemCount)}</div>
     {expanded && <div className="dash-room-orders">
       {sortedOrders.map((o) => <div className="dash-room-order" key={o.id}>
-        <div className="dash-room-order-head"><span>{o.heure}</span><b>{o.total > 0 ? `${o.total} ${currency}` : "Gratuit"}</b></div>
-        <ul className="dash-items">{mergeArticles(o.articles).map((a) => <li key={a.nom}>{a.emoji} {a.nom} × {a.qty}</li>)}</ul>
+        <div className="dash-room-order-head"><span>{o.heure}</span><b>{o.total > 0 ? `${o.total} ${currency}` : t.free}</b></div>
+        <ul className="dash-items">{mergeArticles(o.articles).map((a) => <li key={a.nom}>{a.emoji} {translateOrderName(a.nom, lang)} × {a.qty}</li>)}</ul>
       </div>)}
     </div>}
-    <button className="dash-room-toggle" onClick={() => setExpanded((v) => !v)}>{expanded ? "Réduire ↑" : "Voir le détail →"}</button>
-    <div className="dash-total"><span>Total séjour</span><b>{total} {currency}</b></div>
+    <button className="dash-room-toggle" onClick={() => setExpanded((v) => !v)}>{expanded ? t.collapse : t.seeDetail}</button>
+    <div className="dash-total"><span>{t.stayTotal}</span><b>{total} {currency}</b></div>
   </div>;
 }
 
-function OrderCard({ order, now, newFlag, onAction, currency }: { order: Order; now: number; newFlag: boolean; onAction: (id: number, next: OrderStatus) => void; currency: string }) {
+function OrderCard({ order, now, newFlag, onAction, currency, t, lang }: { order: Order; now: number; newFlag: boolean; onAction: (id: number, next: OrderStatus) => void; currency: string } & Tr) {
   const mins = minutesAgo(order.timestamp, now);
   return <div className={`dash-card${newFlag ? " dash-new" : ""}${order.statut === "en_route" ? " dash-pending-client" : ""}${order.statut === "livre" ? " dash-delivered" : ""}`}>
     <div className="dash-card-top"><strong>#{String(order.id).slice(-4)}</strong><span>{order.heure}</span></div>
-    <div className="dash-room">Chambre {order.chambre} · {order.client}</div>
-    <ul className="dash-items">{order.articles.map((a, i) => <li key={i}>{a.emoji} {a.nom} × {a.qty}</li>)}</ul>
-    <div className="dash-total"><span>Total</span><b>{order.total} {currency}</b></div>
-    {order.statut === "nouveau" && <button className="dash-btn-accept" onClick={() => onAction(order.id, "en_preparation")}>✓ Accepter &amp; Préparer</button>}
-    {order.statut === "en_preparation" && <button className="dash-btn-ready" onClick={() => onAction(order.id, "en_route")}>→ Prêt à livrer</button>}
-    {order.statut === "en_route" && <span className="dash-badge-pending">En livraison · en attente du client</span>}
-    {order.statut === "livre" && <span className="dash-badge-done">Livré ✓</span>}
-    <div className="dash-time">{order.heure} — il y a {mins} min</div>
+    <div className="dash-room">{t.room(order.chambre)} · {order.client}</div>
+    <ul className="dash-items">{order.articles.map((a, i) => <li key={i}>{a.emoji} {translateOrderName(a.nom, lang)} × {a.qty}</li>)}</ul>
+    <div className="dash-total"><span>{t.total}</span><b>{order.total} {currency}</b></div>
+    {order.statut === "nouveau" && <button className="dash-btn-accept" onClick={() => onAction(order.id, "en_preparation")}>{t.acceptPrepare}</button>}
+    {order.statut === "en_preparation" && <button className="dash-btn-ready" onClick={() => onAction(order.id, "en_route")}>{t.readyToDeliver}</button>}
+    {order.statut === "en_route" && <span className="dash-badge-pending">{t.inDeliveryWaiting}</span>}
+    {order.statut === "livre" && <span className="dash-badge-done">{t.deliveredBadge}</span>}
+    <div className="dash-time">{t.timeAgo(order.heure, mins)}</div>
   </div>;
 }
 
-const reservationStatusLabel: Record<ApaleoArrival["status"], string> = { attendu: "Attendu", arrive: "Arrivé", parti: "Parti" };
-
-function ReservationRow({ r }: { r: ApaleoArrival }) {
+function ReservationRow({ r, t }: { r: ApaleoArrival; t: DashCopy }) {
   return <div className={`dash-resa-row dash-resa-${r.status}`}>
-    <span className="dash-resa-room">Ch. {r.room}</span>
+    <span className="dash-resa-room">{t.roomAbbr} {r.room}</span>
     <span className="dash-resa-guest">{r.guestName}</span>
-    <span className="dash-resa-dates">{relativeDayLabel(r.arrival)} → {relativeDayLabel(r.departure)}</span>
-    <span className="dash-resa-status">{reservationStatusLabel[r.status]}</span>
+    <span className="dash-resa-dates">{relativeDayLabel(r.arrival, t)} <span className="dash-arrow">→</span> {relativeDayLabel(r.departure, t)}</span>
+    <span className="dash-resa-status">{t.resaStatus[r.status]}</span>
   </div>;
 }
 
-function ReceptionCard({ order, now, newFlag, onAction }: { order: Order; now: number; newFlag: boolean; onAction: (id: number, next: OrderStatus) => void }) {
+function ReceptionCard({ order, now, newFlag, onAction, t, lang }: { order: Order; now: number; newFlag: boolean; onAction: (id: number, next: OrderStatus) => void } & Tr) {
   const mins = minutesAgo(order.timestamp, now);
   const done = order.statut === "livre";
   return <div className={`dash-card${newFlag ? " dash-new" : ""}${done ? " dash-delivered" : ""}`}>
-    <div className="dash-card-top"><strong>Chambre {order.chambre}</strong><span>{order.heure}</span></div>
+    <div className="dash-card-top"><strong>{t.room(order.chambre)}</strong><span>{order.heure}</span></div>
     <div className="dash-room">{order.client}</div>
-    <ul className="dash-items">{order.articles.map((a, i) => <li key={i}>{a.emoji} {a.nom} × {a.qty}</li>)}</ul>
-    {done ? <span className="dash-badge-done">Traité ✓</span> : <button className="dash-btn-accept" onClick={() => onAction(order.id, "livre")}>✓ Marquer comme traité</button>}
-    <div className="dash-time">{order.heure} — il y a {mins} min</div>
+    <ul className="dash-items">{order.articles.map((a, i) => <li key={i}>{a.emoji} {translateOrderName(a.nom, lang)} × {a.qty}</li>)}</ul>
+    {done ? <span className="dash-badge-done">{t.handledBadge}</span> : <button className="dash-btn-accept" onClick={() => onAction(order.id, "livre")}>{t.markHandled}</button>}
+    <div className="dash-time">{t.timeAgo(order.heure, mins)}</div>
   </div>;
 }
 
@@ -190,23 +189,23 @@ function RevenueTrend({ data, currency }: { data: { label: string; value: number
   </div>;
 }
 
-function HistoriqueRoomCard({ room, currency }: { room: { chambre: number; client: string; orders: Order[] }; currency: string }) {
+function HistoriqueRoomCard({ room, currency, t, lang }: { room: { chambre: number; client: string; orders: Order[] }; currency: string } & Tr) {
   const [expanded, setExpanded] = useState(false);
   const total = room.orders.reduce((s, o) => s + o.total, 0);
   const itemCount = room.orders.reduce((s, o) => s + o.articles.reduce((s2, a) => s2 + a.qty, 0), 0);
   const sortedOrders = [...room.orders].sort((a, b) => b.timestamp - a.timestamp);
   return <div className="dash-card">
-    <div className="dash-card-top"><strong>Chambre {room.chambre}</strong></div>
+    <div className="dash-card-top"><strong>{t.room(room.chambre)}</strong></div>
     <div className="dash-room">{room.client}</div>
-    <div className="dash-room-summary">{room.orders.length} commande{room.orders.length > 1 ? "s" : ""} · {itemCount} article{itemCount > 1 ? "s" : ""}</div>
+    <div className="dash-room-summary">{t.ordersItems(room.orders.length, itemCount)}</div>
     {expanded && <div className="dash-room-orders">
       {sortedOrders.map((o) => <div className="dash-room-order" key={o.id}>
-        <div className="dash-room-order-head"><span>{o.heure}</span><b>{o.total > 0 ? `${o.total} ${currency}` : "Gratuit"}</b></div>
-        <ul className="dash-items">{mergeArticles(o.articles).map((a) => <li key={a.nom}>{a.emoji} {a.nom} × {a.qty}</li>)}</ul>
+        <div className="dash-room-order-head"><span>{o.heure}</span><b>{o.total > 0 ? `${o.total} ${currency}` : t.free}</b></div>
+        <ul className="dash-items">{mergeArticles(o.articles).map((a) => <li key={a.nom}>{a.emoji} {translateOrderName(a.nom, lang)} × {a.qty}</li>)}</ul>
       </div>)}
     </div>}
-    <button className="dash-room-toggle" onClick={() => setExpanded((v) => !v)}>{expanded ? "Réduire ↑" : "Voir le détail →"}</button>
-    <div className="dash-total"><span>Total du jour</span><b>{total} {currency}</b></div>
+    <button className="dash-room-toggle" onClick={() => setExpanded((v) => !v)}>{expanded ? t.collapse : t.seeDetail}</button>
+    <div className="dash-total"><span>{t.dayTotal}</span><b>{total} {currency}</b></div>
   </div>;
 }
 
@@ -214,6 +213,24 @@ export default function DashboardCuisine() {
   const { orders } = useOrders();
   const config = useConfig();
   const currency = getCurrency(config.country);
+  const [lang, setLang] = useState<Lang>(readStoredLang);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+  const t = dashboardCopy[lang];
+  const currentLang = languageOptions.find((o) => o.code === lang) ?? languageOptions[0];
+  const rtl = Boolean(currentLang.rtl);
+  const chooseLang = (code: Lang) => {
+    setLang(code);
+    setLangOpen(false);
+    try { localStorage.setItem(LANG_KEY, code); } catch { /* storage unavailable */ }
+  };
+  useEffect(() => {
+    if (!langOpen) return;
+    const close = (e: MouseEvent) => { if (!langRef.current?.contains(e.target as Node)) setLangOpen(false); };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [langOpen]);
+
   const [reservations, setReservations] = useState<ApaleoArrival[]>([]);
   const [reservationsError, setReservationsError] = useState(false);
   useEffect(() => {
@@ -274,7 +291,7 @@ export default function DashboardCuisine() {
   const sendReply = () => {
     if (!chatReply.trim() || selectedRoom == null) return;
     const conv = conversations.find((c) => c.room === selectedRoom);
-    sendChatMessage(selectedRoom, conv?.guest ?? "Client", "reception", chatReply.trim());
+    sendChatMessage(selectedRoom, conv?.guest ?? t.guestFallback, "reception", chatReply.trim());
     setChatReply("");
   };
 
@@ -362,76 +379,88 @@ export default function DashboardCuisine() {
     return [...map.values()].sort((a, b) => a.chambre - b.chambre);
   }, [orders]);
 
-  return <div className="dash-shell">
+  return <div className="dash-shell" dir={rtl ? "rtl" : "ltr"} lang={lang}>
     <header className="dash-header">
-      <div><div className="dash-brand">CHECKLY · Dashboard Cuisine</div><div className="dash-sub">{config.hotelName} {config.city}</div></div>
-      <div className="dash-live"><b />Connecté</div>
+      <div><div className="dash-brand">{t.brand}</div><div className="dash-sub">{config.hotelName} {config.city}</div></div>
+      <div className="dash-live"><b />{t.connected}</div>
       <div className="dash-toggle">
-        <button className={view === "cuisine" ? "active" : ""} onClick={() => setView("cuisine")}>Cuisine</button>
-        <button className={view === "reception" ? "active" : ""} onClick={() => setView("reception")}>Réception{receptionTasksPendingCount > 0 && <b className="dash-toggle-dot" />}</button>
-        <button className={view === "chambres" ? "active" : ""} onClick={() => setView("chambres")}>Chambres</button>
-        <button className={`${view === "chat" ? "active" : ""}${newChatFlash ? " dash-flash" : ""}`} onClick={() => setView("chat")}>Chat{conversations.some((c) => c.lastFrom === "client") && <b className="dash-toggle-dot" />}</button>
+        <button className={view === "cuisine" ? "active" : ""} onClick={() => setView("cuisine")}>{t.tabKitchen}</button>
+        <button className={view === "reception" ? "active" : ""} onClick={() => setView("reception")}>{t.tabReception}{receptionTasksPendingCount > 0 && <b className="dash-toggle-dot" />}</button>
+        <button className={view === "chambres" ? "active" : ""} onClick={() => setView("chambres")}>{t.tabRooms}</button>
+        <button className={`${view === "chat" ? "active" : ""}${newChatFlash ? " dash-flash" : ""}`} onClick={() => setView("chat")}>{t.tabChat}{conversations.some((c) => c.lastFrom === "client") && <b className="dash-toggle-dot" />}</button>
       </div>
       <div className="dash-counters">
-        <div className="dash-counter"><strong>{nouvelles.length}</strong><span>En attente</span></div>
-        <div className="dash-counter"><strong>{preparation.length}</strong><span>En préparation</span></div>
-        <div className="dash-counter"><strong>{orders.filter((o) => o.kind === "cuisine" && o.statut === "livre").length}</strong><span>Livrées</span></div>
+        <div className="dash-counter"><strong>{nouvelles.length}</strong><span>{t.counterPending}</span></div>
+        <div className="dash-counter"><strong>{preparation.length}</strong><span>{t.counterPreparing}</span></div>
+        <div className="dash-counter"><strong>{orders.filter((o) => o.kind === "cuisine" && o.statut === "livre").length}</strong><span>{t.counterDelivered}</span></div>
       </div>
-      <time className="dash-clock">{new Date(now).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</time>
+      <time className="dash-clock">{clockTime(now, t.locale)}</time>
+      <div className="dash-lang" ref={langRef}>
+        <button className="dash-lang-btn" onClick={() => setLangOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={langOpen} aria-label={t.languageLabel}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9Z" /></svg>
+          <span>{currentLang.label}</span>
+          <i aria-hidden="true">▾</i>
+        </button>
+        {langOpen && <ul className="dash-lang-menu" role="listbox" aria-label={t.languageLabel}>
+          {languageOptions.map((o) => <li key={o.code} role="option" aria-selected={o.code === lang}>
+            <button className={o.code === lang ? "active" : ""} onClick={() => chooseLang(o.code)} dir={o.rtl ? "rtl" : "ltr"}>{o.label}{o.code === lang && <b aria-hidden="true">✓</b>}</button>
+          </li>)}
+        </ul>}
+      </div>
     </header>
 
     <div className="dash-main">
       {view === "cuisine" ? <div className="dash-columns">
         <section className="dash-column" style={{ background: "#FFEBEE" }}>
-          <h2><b style={{ background: "#E53935" }} />Nouvelles</h2>
-          <div className="dash-cards">{nouvelles.length === 0 ? <p className="dash-empty">Aucune nouvelle commande</p> : nouvelles.map((o) => <OrderCard key={o.id} order={o} now={now} newFlag={newIds.has(o.id)} onAction={act} currency={currency} />)}</div>
+          <h2><b style={{ background: "#E53935" }} />{t.colNew}</h2>
+          <div className="dash-cards">{nouvelles.length === 0 ? <p className="dash-empty">{t.emptyNew}</p> : nouvelles.map((o) => <OrderCard key={o.id} order={o} now={now} newFlag={newIds.has(o.id)} onAction={act} currency={currency} t={t} lang={lang} />)}</div>
         </section>
         <section className="dash-column" style={{ background: "#FFF3E0" }}>
-          <h2><b style={{ background: "#FB8C00" }} />En préparation</h2>
-          <div className="dash-cards">{preparation.length === 0 ? <p className="dash-empty">Rien en préparation</p> : preparation.map((o) => <OrderCard key={o.id} order={o} now={now} newFlag={false} onAction={act} currency={currency} />)}</div>
+          <h2><b style={{ background: "#FB8C00" }} />{t.colPreparing}</h2>
+          <div className="dash-cards">{preparation.length === 0 ? <p className="dash-empty">{t.emptyPreparing}</p> : preparation.map((o) => <OrderCard key={o.id} order={o} now={now} newFlag={false} onAction={act} currency={currency} t={t} lang={lang} />)}</div>
         </section>
         <section className="dash-column" style={{ background: "#E8F5E9" }}>
-          <h2><b style={{ background: "#388E3C" }} />Prêtes / Livrées</h2>
-          <div className="dash-cards">{pretesLivrees.length === 0 ? <p className="dash-empty">Rien à livrer</p> : pretesLivrees.map((o) => <OrderCard key={o.id} order={o} now={now} newFlag={false} onAction={act} currency={currency} />)}</div>
+          <h2><b style={{ background: "#388E3C" }} />{t.colReady}</h2>
+          <div className="dash-cards">{pretesLivrees.length === 0 ? <p className="dash-empty">{t.emptyReady}</p> : pretesLivrees.map((o) => <OrderCard key={o.id} order={o} now={now} newFlag={false} onAction={act} currency={currency} t={t} lang={lang} />)}</div>
         </section>
       </div> : view === "reception" ? <div className="dash-column" style={{ background: "var(--paper)", border: "1px solid var(--border)" }}>
-        <h2>Arrivées &amp; séjours <small className="dash-pms-tag">🔗 Apaleo</small></h2>
-        <div className="dash-resa-list">{reservationsError ? <p className="dash-empty">Connexion au système hôtelier impossible</p> : reservations.length === 0 ? <p className="dash-empty">Aucune arrivée sur les prochains jours</p> : reservations.map((r) => <ReservationRow key={r.id} r={r} />)}</div>
-        <h2 style={{ marginTop: "24px" }}>Demandes à traiter</h2>
-        <div className="dash-rooms">{receptionTasks.length === 0 ? <p className="dash-empty">Aucune demande</p> : receptionTasks.map((o) => <ReceptionCard key={o.id} order={o} now={now} newFlag={newIds.has(o.id)} onAction={act} />)}</div>
-        <h2 style={{ marginTop: "24px" }}>Autres notifications</h2>
-        <div className="dash-rooms">{receptionNotices.length === 0 ? <p className="dash-empty">Aucune notification</p> : receptionNotices.map((o) => <ReceptionCard key={o.id} order={o} now={now} newFlag={newIds.has(o.id)} onAction={act} />)}</div>
+        <h2>{t.arrivalsStays} <small className="dash-pms-tag">🔗 Apaleo</small></h2>
+        <div className="dash-resa-list">{reservationsError ? <p className="dash-empty">{t.pmsDown}</p> : reservations.length === 0 ? <p className="dash-empty">{t.noArrivals}</p> : reservations.map((r) => <ReservationRow key={r.id} r={r} t={t} />)}</div>
+        <h2 style={{ marginTop: "24px" }}>{t.toHandle}</h2>
+        <div className="dash-rooms">{receptionTasks.length === 0 ? <p className="dash-empty">{t.noRequest}</p> : receptionTasks.map((o) => <ReceptionCard key={o.id} order={o} now={now} newFlag={newIds.has(o.id)} onAction={act} t={t} lang={lang} />)}</div>
+        <h2 style={{ marginTop: "24px" }}>{t.otherNotifs}</h2>
+        <div className="dash-rooms">{receptionNotices.length === 0 ? <p className="dash-empty">{t.noNotif}</p> : receptionNotices.map((o) => <ReceptionCard key={o.id} order={o} now={now} newFlag={newIds.has(o.id)} onAction={act} t={t} lang={lang} />)}</div>
       </div> : view === "chambres" ? <div className="dash-column" style={{ background: "var(--paper)", border: "1px solid var(--border)" }}>
-        <h2>Chambres occupées</h2>
-        <div className="dash-rooms">{rooms.length === 0 ? <p className="dash-empty">Aucune chambre active</p> : rooms.map((r) => <RoomCard key={r.chambre} room={r} currency={currency} />)}</div>
+        <h2>{t.occupiedRooms}</h2>
+        <div className="dash-rooms">{rooms.length === 0 ? <p className="dash-empty">{t.noActiveRoom}</p> : rooms.map((r) => <RoomCard key={r.chambre} room={r} currency={currency} t={t} lang={lang} />)}</div>
       </div> : view === "stats" ? <div className="dash-column dash-stats-full" style={{ background: "var(--paper)", border: "1px solid var(--border)" }}>
         <div className="dash-stats-full-header">
-          <h2>Statistiques détaillées</h2>
+          <h2>{t.detailedStats}</h2>
           <div className="dash-stats-full-header-right">
             <div className="dash-period-toggle">
-              <button className={statsCategory === "cuisine" ? "active" : ""} onClick={() => setStatsCategory("cuisine")}>🍽️ Cuisine</button>
-              <button className={statsCategory === "reception" ? "active" : ""} onClick={() => setStatsCategory("reception")}>🧹 Ménage &amp; services</button>
+              <button className={statsCategory === "cuisine" ? "active" : ""} onClick={() => setStatsCategory("cuisine")}>{t.catKitchen}</button>
+              <button className={statsCategory === "reception" ? "active" : ""} onClick={() => setStatsCategory("reception")}>{t.catHousekeeping}</button>
             </div>
             <div className="dash-period-toggle">
-              <button className={statsPeriod === "jour" ? "active" : ""} onClick={() => setStatsPeriod("jour")}>Jour</button>
-              <button className={statsPeriod === "semaine" ? "active" : ""} onClick={() => setStatsPeriod("semaine")}>Semaine</button>
-              <button className={statsPeriod === "mois" ? "active" : ""} onClick={() => setStatsPeriod("mois")}>Mois</button>
+              <button className={statsPeriod === "jour" ? "active" : ""} onClick={() => setStatsPeriod("jour")}>{t.periodDay}</button>
+              <button className={statsPeriod === "semaine" ? "active" : ""} onClick={() => setStatsPeriod("semaine")}>{t.periodWeek}</button>
+              <button className={statsPeriod === "mois" ? "active" : ""} onClick={() => setStatsPeriod("mois")}>{t.periodMonth}</button>
             </div>
-            <button className="dash-seed-btn" onClick={() => seedDemoActivity(config)}>🎲 Simuler de l&apos;activité</button>
+            <button className="dash-seed-btn" onClick={() => seedDemoActivity(config)}>{t.simulateActivity}</button>
           </div>
         </div>
         <div className="dash-stats-summary">
-          <div><span>{statsCategory === "cuisine" ? "Commandes" : "Demandes"}</span><b>{periodOrders.length}</b></div>
-          <div><span>Chiffre d&apos;affaires</span><b>{periodTotal} {currency}</b></div>
-          <div><span>{statsCategory === "cuisine" ? "Articles distincts" : "Types de demandes"}</span><b>{itemStats.length}</b></div>
+          <div><span>{statsCategory === "cuisine" ? t.orders : t.requests}</span><b>{periodOrders.length}</b></div>
+          <div><span>{t.revenue}</span><b>{periodTotal} {currency}</b></div>
+          <div><span>{statsCategory === "cuisine" ? t.distinctItems : t.requestTypes}</span><b>{itemStats.length}</b></div>
         </div>
-        <h3 className="dash-stats-subtitle">Évolution du chiffre d&apos;affaires</h3>
+        <h3 className="dash-stats-subtitle">{t.revenueTrend}</h3>
         <RevenueTrend data={trendData} currency={currency} />
-        <h3 className="dash-stats-subtitle">{statsCategory === "cuisine" ? "Tout ce qui a été commandé" : "Ce que les clients demandent le plus"}</h3>
+        <h3 className="dash-stats-subtitle">{statsCategory === "cuisine" ? t.everythingOrdered : t.mostRequested}</h3>
         <div className="dash-stats-bars">
-          {itemStats.length === 0 ? <p className="dash-empty">{statsCategory === "cuisine" ? "Aucune commande sur cette période" : "Aucune demande sur cette période"}</p> : itemStats.map((it) => (
+          {itemStats.length === 0 ? <p className="dash-empty">{statsCategory === "cuisine" ? t.noOrdersPeriod : t.noRequestsPeriod}</p> : itemStats.map((it) => (
             <div className="dash-bar-row" key={it.nom}>
-              <span className="dash-bar-label">{it.nom}</span>
+              <span className="dash-bar-label">{translateOrderName(it.nom, lang)}</span>
               <div className="dash-bar-track"><div className="dash-bar-fill" style={{ width: `${maxQty ? Math.round((it.qty / maxQty) * 100) : 0}%` }} /></div>
               <span className="dash-bar-value">{it.qty}× · {it.revenue} {currency}</span>
             </div>
@@ -440,48 +469,48 @@ export default function DashboardCuisine() {
       </div> : view === "chat" ? <div className="dash-column dash-chat-full" style={{ background: "var(--paper)", border: "1px solid var(--border)" }}>
         <div className="dash-chat-list">
           <div className="dash-chat-list-header">
-            <h2>Conversations</h2>
-            <button className="dash-seed-btn" onClick={() => seedDemoChats(config)}>🎲 Simuler des chats</button>
+            <h2>{t.conversations}</h2>
+            <button className="dash-seed-btn" onClick={() => seedDemoChats(config)}>{t.simulateChats}</button>
           </div>
-          {conversations.length === 0 ? <p className="dash-empty">Aucune conversation</p> : conversations.map((c) => {
+          {conversations.length === 0 ? <p className="dash-empty">{t.noConversation}</p> : conversations.map((c) => {
             const preview = c.messages[c.messages.length - 1];
             return <button key={c.room} className={`dash-chat-item${selectedRoom === c.room ? " active" : ""}`} onClick={() => setSelectedRoom(c.room)}>
-              <div className="dash-chat-item-top"><strong>Chambre {c.room}</strong>{c.lastFrom === "client" && <b className="dash-toggle-dot" />}</div>
+              <div className="dash-chat-item-top"><strong>{t.room(c.room)}</strong>{c.lastFrom === "client" && <b className="dash-toggle-dot" />}</div>
               <span className="dash-chat-item-guest">{c.guest}</span>
-              <span className="dash-chat-item-preview">{preview.from === "reception" ? "Vous : " : ""}{preview.text}</span>
+              <span className="dash-chat-item-preview">{preview.from === "reception" ? t.you : ""}{preview.text}</span>
             </button>;
           })}
         </div>
         <div className="dash-chat-thread">
-          {selectedRoom == null || !conversations.some((c) => c.room === selectedRoom) ? <p className="dash-empty">Sélectionnez une conversation</p> : (() => {
+          {selectedRoom == null || !conversations.some((c) => c.room === selectedRoom) ? <p className="dash-empty">{t.pickConversation}</p> : (() => {
             const conv = conversations.find((c) => c.room === selectedRoom)!;
             return <>
-              <div className="dash-chat-thread-header"><strong>Chambre {conv.room}</strong><span>{conv.guest}</span></div>
+              <div className="dash-chat-thread-header"><strong>{t.room(conv.room)}</strong><span>{conv.guest}</span></div>
               <div className="dash-chat-thread-body">{conv.messages.map((m) => <div key={m.id} className={`dash-chat-bubble ${m.from}`}>{m.text}</div>)}</div>
-              <div className="dash-quick-replies">{QUICK_REPLIES.map((qr) => <button key={qr} className="dash-quick-reply" onClick={() => setChatReply(qr)}>{qr}</button>)}</div>
+              <div className="dash-quick-replies">{t.quickReplies.map((qr) => <button key={qr} className="dash-quick-reply" onClick={() => setChatReply(qr)}>{qr}</button>)}</div>
               <div className="dash-chat-thread-input">
-                <input value={chatReply} onChange={(e) => setChatReply(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendReply()} placeholder="Répondre..." />
-                <button onClick={sendReply}>Envoyer</button>
+                <input value={chatReply} onChange={(e) => setChatReply(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendReply()} placeholder={t.replyPlaceholder} />
+                <button onClick={sendReply}>{t.send}</button>
               </div>
             </>;
           })()}
         </div>
       </div> : <div className="dash-column dash-history-full" style={{ background: "var(--paper)", border: "1px solid var(--border)" }}>
-        <h2>Historique du jour</h2>
-        {historiqueRooms.length === 0 ? <p className="dash-empty">Aucune commande livrée aujourd&apos;hui</p> : <div className="dash-rooms">{historiqueRooms.map((r) => <HistoriqueRoomCard key={r.chambre} room={r} currency={currency} />)}</div>}
+        <h2>{t.historyToday}</h2>
+        {historiqueRooms.length === 0 ? <p className="dash-empty">{t.noDeliveredToday}</p> : <div className="dash-rooms">{historiqueRooms.map((r) => <HistoriqueRoomCard key={r.chambre} room={r} currency={currency} t={t} lang={lang} />)}</div>}
       </div>}
 
       <aside className="dash-sidebar">
-        <div className="dash-panel"><h3>Statistiques du jour</h3>
-          <div className="dash-stat"><span>Total commandes</span><b>{stats.total}</b></div>
-          <div className="dash-stat"><span>Chiffre d&apos;affaires</span><b>{stats.ca} {currency}</b></div>
-          <div className="dash-stat"><span>Temps moyen</span><b>{stats.tempsMoyen} min</b></div>
-          <div className="dash-stat"><span>Plat le plus commandé</span><b>{stats.plat}</b></div>
-          <button className="dash-stats-link" onClick={() => setView("stats")}>Voir toutes les statistiques →</button>
+        <div className="dash-panel"><h3>{t.todayStats}</h3>
+          <div className="dash-stat"><span>{t.totalOrders}</span><b>{stats.total}</b></div>
+          <div className="dash-stat"><span>{t.revenue}</span><b>{stats.ca} {currency}</b></div>
+          <div className="dash-stat"><span>{t.avgTime}</span><b>{t.minShort(stats.tempsMoyen)}</b></div>
+          <div className="dash-stat"><span>{t.topDish}</span><b>{stats.plat === "—" ? "—" : translateOrderName(stats.plat, lang)}</b></div>
+          <button className="dash-stats-link" onClick={() => setView("stats")}>{t.seeAllStats}</button>
         </div>
-        <div className="dash-panel"><h3>Dernières livrées</h3>
-          <div className="dash-history">{historique.length === 0 ? <p className="dash-empty">Aucune commande livrée</p> : historique.map((o) => <div key={o.id} className="dash-history-row"><b>Chambre {o.chambre}</b><span>{o.total} {currency} · {o.heure}</span></div>)}</div>
-          <button className="dash-stats-link" onClick={() => setView("historique")}>Voir tout l&apos;historique →</button>
+        <div className="dash-panel"><h3>{t.lastDelivered}</h3>
+          <div className="dash-history">{historique.length === 0 ? <p className="dash-empty">{t.noDelivered}</p> : historique.map((o) => <div key={o.id} className="dash-history-row"><b>{t.room(o.chambre)}</b><span>{o.total} {currency} · {o.heure}</span></div>)}</div>
+          <button className="dash-stats-link" onClick={() => setView("historique")}>{t.seeAllHistory}</button>
         </div>
       </aside>
     </div>

@@ -18,6 +18,7 @@ import {
 import { useWeather, weatherLabel } from "@/lib/weather";
 import { useChatMessages, sendChatMessage } from "@/lib/chat";
 import { tabletCopy } from "@/lib/i18n/tablet";
+import { translateServiceLabel } from "@/lib/i18n/serviceLabels";
 
 function translatedOption(item: MenuItem, i: number, lang: Lang): string | undefined {
   const byLang: Record<Lang, string[] | undefined> = { fr: item.options, en: item.optionsEn, es: item.optionsEs, de: item.optionsDe, it: item.optionsIt, ar: item.optionsAr };
@@ -49,28 +50,6 @@ const statusOrder = ["nouveau", "en_preparation", "en_route", "livre"] as const;
 const SERVICE_KEYS = new Set(["menage-heure", "late-checkout", "Ménage immédiat", "Changer les draps"]);
 
 
-const serviceLabelWords: Record<Exclude<Lang, "fr">, { dnd: string; dndEnd: string; immediateCleaning: string; changeSheets: string; lateCheckout: string; cleaningAt: (h: string) => string; wakeUpAt: (h: string) => string }> = {
-  en: { dnd: "Do not disturb", dndEnd: "End of Do Not Disturb", immediateCleaning: "Immediate housekeeping", changeSheets: "Change sheets", lateCheckout: "Late check-out until 2:00 PM", cleaningAt: (h) => `Housekeeping at ${h}`, wakeUpAt: (h) => `Wake-up call at ${h}` },
-  es: { dnd: "No molestar", dndEnd: "Fin del modo No molestar", immediateCleaning: "Limpieza inmediata", changeSheets: "Cambiar las sábanas", lateCheckout: "Salida tardía a las 14:00", cleaningAt: (h) => `Limpieza a las ${h}`, wakeUpAt: (h) => `Despertador a las ${h}` },
-  de: { dnd: "Nicht stören", dndEnd: "Ende des Modus „Nicht stören“", immediateCleaning: "Sofortige Reinigung", changeSheets: "Bettwäsche wechseln", lateCheckout: "Später Check-out bis 14:00 Uhr", cleaningAt: (h) => `Reinigung um ${h}`, wakeUpAt: (h) => `Weckruf um ${h}` },
-  it: { dnd: "Non disturbare", dndEnd: "Fine della modalità Non disturbare", immediateCleaning: "Pulizia immediata", changeSheets: "Cambiare le lenzuola", lateCheckout: "Late check-out alle 14:00", cleaningAt: (h) => `Pulizia alle ${h}`, wakeUpAt: (h) => `Sveglia alle ${h}` },
-  ar: { dnd: "عدم الإزعاج", dndEnd: "إنهاء وضع عدم الإزعاج", immediateCleaning: "تنظيف فوري", changeSheets: "تغيير الملاءات", lateCheckout: "تسجيل مغادرة متأخر حتى الساعة 14:00", cleaningAt: (h) => `التنظيف في ${h}`, wakeUpAt: (h) => `الإيقاظ في ${h}` },
-};
-
-function translateServiceLabel(nom: string, lang: Lang): string {
-  if (lang === "fr") return nom;
-  const w = serviceLabelWords[lang];
-  if (nom === "Ne pas déranger") return w.dnd;
-  if (nom === "Fin du mode Ne pas déranger") return w.dndEnd;
-  if (nom === "Ménage immédiat") return w.immediateCleaning;
-  if (nom === "Changer les draps") return w.changeSheets;
-  if (nom === "Late check-out 14h00") return w.lateCheckout;
-  const menageMatch = nom.match(/^Ménage à (.+)$/);
-  if (menageMatch) return w.cleaningAt(menageMatch[1]);
-  const reveilMatch = nom.match(/^Réveil à (.+)$/);
-  if (reveilMatch) return w.wakeUpAt(reveilMatch[1]);
-  return nom;
-}
 
 function CartIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 1.9-1.4L21 8H7" /><circle cx="10" cy="20" r="1" /><circle cx="18" cy="20" r="1" /></svg>;
