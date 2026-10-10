@@ -135,6 +135,9 @@ body:has(.pr) { background: #f4faf6; }
 .pr-scene--2 .pr-tag-icon { color: var(--pr-ink); }
 .pr-device { position: relative; align-self: center; width: min(100%, 560px); margin: auto; }
 .pr-device--1 { width: min(100%, 300px); }
+.pr-device--0 { margin-bottom: 12%; }
+.pr-device-extra { position: absolute; right: -4%; bottom: -17%; width: 48%; }
+.pr-device-extra img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid rgba(8, 56, 45, 0.16); box-shadow: 0 2px 4px rgba(8, 56, 45, 0.14), 0 26px 40px -18px rgba(8, 56, 45, 0.6); }
 .pr-device > img { display: block; width: 100%; height: auto; }
 .pr-device--0 > img { border-radius: 20px; border: 1px solid rgba(8, 56, 45, 0.14); box-shadow: 0 2px 4px rgba(8, 56, 45, 0.1), 0 34px 50px -24px rgba(8, 56, 45, 0.6); }
 .pr-chip--scene { top: 24px; right: 26px; }

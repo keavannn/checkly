@@ -8,6 +8,7 @@ export type Scene = {
   chip: string;
   photoAlt: string;
   screenAlt: string;
+  extraAlt?: string;
   caption: string;
   note?: string;
 };
@@ -60,7 +61,7 @@ export const siteCopy: Record<SiteLang, SiteCopy> = {
     hero: {
       titleA: "Un lundi matin",
       titleB: "à la réception.",
-      lead: "Checkly, c'est une borne dans le hall, une tablette dans la chambre et un écran pour l'équipe, reliés au logiciel de réception que l'hôtel utilise déjà.",
+      lead: "Checkly, c'est une borne dans le hall où le client s'enregistre et récupère ses cartes de chambre, une tablette dans la chambre et un écran pour l'équipe, reliés au logiciel de réception que l'hôtel utilise déjà.",
       note: "C'est un prototype, créé à Montpellier. Ce que vous voyez ici est réel, et ce qui n'existe pas encore est dit plus bas.",
       chipCheckin: "Check-in écrit dans la réservation",
       chipOrder: "Nouvelle commande · Chambre 214",
@@ -78,10 +79,11 @@ export const siteCopy: Record<SiteLang, SiteCopy> = {
           time: "8 h 45",
           place: "Dans le hall",
           without: "Trois clients arrivent en même temps. Chacun attend son tour au comptoir, et la réception retrouve les réservations une par une.",
-          with: "Le client choisit sa langue sur la borne, retrouve sa réservation avec son nom, puis peut ajouter une chambre supérieure ou un extra. Le check-in s'écrit dans la réservation du logiciel de réception.",
+          with: "Le client choisit sa langue sur la borne, retrouve sa réservation avec son nom, puis peut ajouter une chambre supérieure ou un extra. Il règle son séjour, et la borne sort les cartes de sa chambre. Le check-in s'écrit dans la réservation du logiciel de réception.",
           chip: "Check-in écrit dans Apaleo",
           photoAlt: "Deux clients au comptoir d'accueil d'un grand hall d'hôtel, devant un réceptionniste.",
           screenAlt: "Écran de la borne : « Améliorez votre séjour », avec trois suites proposées.",
+          extraAlt: "Écran de la borne : « Vos cartes sont prêtes », avec deux cartes de chambre.",
           caption: "La borne propose une chambre supérieure pendant le check-in.",
         },
         {
@@ -137,14 +139,14 @@ export const siteCopy: Record<SiteLang, SiteCopy> = {
       title: "Où on en est, sans détour",
       worksTitle: "Ça marche aujourd'hui",
       works: [
-        "La borne : langue, recherche de la réservation, chambre supérieure et extras, check-in écrit dans Apaleo.",
+        "La borne, de bout en bout : langue, recherche de la réservation, chambre supérieure et extras, paiement, sortie des cartes de chambre et check-in écrit dans Apaleo. Le paiement et les cartes sont simulés à l'écran.",
         "Le check-in d'un groupe sur la borne : 3 chambres, un seul payeur, un seul paiement (parcours simulé dans la démo).",
         "La tablette : commandes, demandes de service, messages à la réception, infos du séjour, activités et météo.",
         "L'écran de l'équipe : les demandes classées de « nouvelle » à « livrée », et les arrivées du jour, en six langues.",
       ],
       notYetTitle: "Pas encore",
       notYet: [
-        "Le paiement par carte, les clés de chambre et le scan de pièce d'identité : ils sont simulés dans la démo.",
+        "Le vrai matériel : le terminal de paiement, l'encodeur des cartes de chambre et le scan de pièce d'identité. La démo les simule à l'écran.",
         "Les réservations de groupe lues et écrites dans le logiciel de réception : le parcours de groupe de la démo est simulé.",
         "Une vraie base de données et une connexion avec mot de passe pour l'équipe.",
         "D'autres logiciels de réception qu'Apaleo.",
@@ -154,6 +156,7 @@ export const siteCopy: Record<SiteLang, SiteCopy> = {
       title: "Les questions qu'on nous pose",
       items: [
         { q: "Est-ce que Checkly remplace notre logiciel de réception ?", a: "Non. Il s'y ajoute, et lit ou écrit dans les réservations qui existent déjà." },
+        { q: "La borne sort-elle vraiment les cartes de chambre ?", a: "C'est le but : après le paiement, la borne fabrique et sort les cartes. Dans la démo, l'écran montre cette étape mais aucun encodeur n'est branché. Cela dépendra du système de serrures de l'hôtel." },
         { q: "Et si nous n'utilisons pas Apaleo ?", a: "Aujourd'hui, seul Apaleo est connecté. Écrivez-nous pour dire quel logiciel vous utilisez : c'est ce qui décidera du prochain branchement." },
         { q: "Est-ce que je peux l'installer dans mon hôtel ?", a: "Pas encore, c'est un prototype. Vous pouvez l'essayer en ligne, et nous cherchons des hôtels qui nous disent ce qui manque." },
         { q: "Combien ça coûte ?", a: "Il n'y a pas encore de prix. Nous voulons d'abord comprendre ce qui compte vraiment pour les hôtels." },
@@ -187,7 +190,7 @@ export const siteCopy: Record<SiteLang, SiteCopy> = {
     hero: {
       titleA: "A Monday morning",
       titleB: "at the front desk.",
-      lead: "Checkly is a kiosk in the lobby, a tablet in the room and one screen for the team, connected to the reception software the hotel already uses.",
+      lead: "Checkly is a kiosk in the lobby where the guest checks in and collects their room cards, a tablet in the room and one screen for the team, connected to the reception software the hotel already uses.",
       note: "It is a prototype, built in Montpellier, France. What you see here is real, and what does not exist yet is stated further down.",
       chipCheckin: "Check-in written into the booking",
       chipOrder: "New order · Room 214",
@@ -205,10 +208,11 @@ export const siteCopy: Record<SiteLang, SiteCopy> = {
           time: "8:45",
           place: "In the lobby",
           without: "Three guests arrive at the same time. Each waits their turn at the desk, and reception finds the bookings one by one.",
-          with: "The guest picks a language on the kiosk, finds the booking by name, then can add a better room or an extra. The check-in is written into the booking in the reception software.",
+          with: "The guest picks a language on the kiosk, finds the booking by name, then can add a better room or an extra. They pay, and the kiosk dispenses their room cards. The check-in is written into the booking in the reception software.",
           chip: "Check-in written into Apaleo",
           photoAlt: "Two guests at the front desk of a large hotel lobby, in front of a receptionist.",
           screenAlt: "Kiosk screen: “Upgrade your stay”, with three suites on offer.",
+          extraAlt: "Kiosk screen: “Your cards are ready”, with two room cards.",
           caption: "The kiosk offers a better room during check-in.",
         },
         {
@@ -264,14 +268,14 @@ export const siteCopy: Record<SiteLang, SiteCopy> = {
       title: "Where we are, plainly",
       worksTitle: "Works today",
       works: [
-        "The kiosk: language, booking search, better room and extras, check-in written into Apaleo.",
+        "The kiosk, end to end: language, booking search, better room and extras, payment, room cards, and check-in written into Apaleo. Payment and cards are simulated on screen.",
         "Group check-in at the kiosk: 3 rooms, one payer, one payment (a simulated flow in the demo).",
         "The tablet: orders, service requests, messages to reception, stay information, activities and weather.",
         "The team screen: requests sorted from “new” to “delivered”, and the day's arrivals, in six languages.",
       ],
       notYetTitle: "Not yet",
       notYet: [
-        "Card payment, room keys and ID scanning: these are simulated in the demo.",
+        "The real hardware: the payment terminal, the room-card encoder and the ID scanner. The demo simulates them on screen.",
         "Group bookings read from and written to the reception software: the demo's group flow is simulated.",
         "A real database and a password login for the team.",
         "Reception software other than Apaleo.",
@@ -281,6 +285,7 @@ export const siteCopy: Record<SiteLang, SiteCopy> = {
       title: "Questions we get",
       items: [
         { q: "Does Checkly replace our reception software?", a: "No. It adds to it, and reads from or writes to the bookings that already exist." },
+        { q: "Does the kiosk really dispense the room cards?", a: "That is the goal: after payment, the kiosk makes and dispenses the cards. In the demo, the screen shows this step but no encoder is connected. It will depend on the hotel's door-lock system." },
         { q: "What if we don't use Apaleo?", a: "Today only Apaleo is connected. Write to us with the software you use: that decides the next connection." },
         { q: "Can I install it in my hotel?", a: "Not yet, it is a prototype. You can try it online, and we are looking for hotels to tell us what is missing." },
         { q: "How much does it cost?", a: "There is no price yet. We first want to understand what really matters to hotels." },

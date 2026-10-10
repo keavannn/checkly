@@ -37,6 +37,7 @@ function Scene({ i, n, progress, scene, labels, lang }: { i: number; n: number; 
       <div className="pr-scene-with">
         <motion.div className={`pr-device pr-device--${i}`} initial={{ opacity: 0, y: 70, rotate: i === 1 ? 0 : 1.5 }} whileInView={{ opacity: 1, y: 0, rotate: 0 }} viewport={{ once: true, amount: 0.35 }} transition={{ duration: 1, ease }}>
           <Screen i={i} lang={lang} alt={scene.screenAlt} />
+          {scene.extraAlt && <div className="pr-device-extra"><Image src={`/presentation/kiosk-cards-${lang}.jpg`} alt={scene.extraAlt} width={2880} height={1620} sizes="(min-width: 900px) 270px, 52vw" /></div>}
         </motion.div>
         <motion.span className="pr-chip pr-chip--scene" initial={{ opacity: 0, scale: 0.6 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.5 }} transition={{ delay: 0.5, type: "spring", stiffness: 260, damping: 18 }}>
           <CheckCircle className="pr-chip-icon" />{scene.chip}
