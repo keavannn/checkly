@@ -25,3 +25,4 @@
 .group-link:hover { background: #f3eee4; }
 
 .group-lookup-grid { grid-template-columns: 1fr; left: 30%; width: 40%; }
+.group-extras small { display: block; margin-top: .2cqw; max-width: 38cqw; overflow: hidden; color: var(--light); font-size: .85cqw; white-space: nowrap; text-overflow: ellipsis; }
