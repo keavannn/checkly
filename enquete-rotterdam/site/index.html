@@ -45,11 +45,11 @@ const CONFIG = {
   transport: {
     mode: "train",               // "train" ou "avion" → change l'animation de l'écran final
     titre: "Le transport",
-    texte: "Réservé, payé, rangé. Toi, tu prends juste ta valise (et ton bonnet)."
+    texte: "Rien n'est encore réservé : c'est une proposition. Tu dis oui, je m'occupe de tout. Toi, tu prends juste ta valise (et ton bonnet)."
   },
   hebergement: {
     titre: "Le QG",
-    texte: "Adresse classée secret défense. Tu la découvriras sur place 🤫"
+    texte: "Pas encore choisi. On le choisit ensemble… ou je te fais la surprise 🤫"
   },
 
   /* ───────── 3. VOS PHOTOS (dossier « photos ») ─────────
@@ -149,12 +149,11 @@ const CONFIG = {
         ] },
       { q: "D'après nos sources, qu'est-ce que {lui} préfère chez toi ?",
         reponses: [
-          { t: "Ton sourire",                     r: "Bonne réponse.", ok: true },
-          { t: "Ton rire",                        r: "Bonne réponse.", ok: true },
-          { t: "Ta façon de voler la couverture", r: "Bonne réponse. (Il a froid, mais il t'aime.)", ok: true },
-          { t: "Tout",                            r: "Bonne réponse.", ok: true }
-        ],
-        apres: "Toutes les réponses étaient bonnes. L'interrogatoire est truqué. Il t'aime." },
+          { t: "Ton sourire",                     r: "Incomplet. Le sourire, oui… mais pas que." },
+          { t: "Ton rire",                        r: "Trop restrictif, inspectrice. Le témoin s'indigne." },
+          { t: "Ta façon de voler la couverture", r: "Ça, il le supporte. Nuance. (Il a froid.)" },
+          { t: "Tout",                            r: "TOUT. Le témoin n'a même pas hésité.", ok: true }
+        ] },
       { q: "Le suspect a cherché « pays avec plus de vélos que d'habitants ». Lequel ?",
         reponses: [
           { t: "La Suisse",    r: "Là-bas, c'est montres et chocolat. Pas assez de vélos." },
@@ -165,9 +164,9 @@ const CONFIG = {
       { q: "Dans la valise du suspect, ça sentait…",
         reponses: [
           { t: "La gaufre au caramel", r: "Stroopwafel détecté. Ton flair est infaillible.", ok: true },
-          { t: "Le fromage",           r: "Gouda détecté. L'enquêtrice frappe encore.", ok: true },
+          { t: "Le fromage",           r: "Du gouda ? Non, ça c'était les chaussettes de {lui}." },
           { t: "La crème solaire",     r: "On ne part pas aux Bahamas, désolé. Fin décembre, c'est bonnet et écharpe." },
-          { t: "La tulipe",            r: "Une tulipe, ça ne sent presque rien. Mais tu as raison quand même.", ok: true }
+          { t: "La tulipe",            r: "Une tulipe, ça ne sent presque rien. Ton flair a pris froid." }
         ] },
       { q: "Dernière question : es-tu prête à disparaître {nbJours} jours avec moi ?",
         reponses: [
@@ -236,7 +235,7 @@ const CONFIG = {
   /* ───────── 6. L'ÉCRAN FINAL ───────── */
   final: {
     avant: "Direction",
-    titre: "{ville} !",
+    titre: "{ville}\u00a0!",
     sousTitre: "Du {debut} au {fin}. Toi, moi, et une nouvelle année.",
     banniere: "{elle} + {lui}",
     compteTitre: "Départ dans",
@@ -248,7 +247,7 @@ const CONFIG = {
     lettreBouton: "Ouvrir la lettre",
     lettre: [
       "Mon {surnom},",
-      "Bravo, enquêtrice : affaire résolue. Le coupable, c'est moi. Je plaide coupable de tout : d'avoir tout organisé en cachette, d'avoir fait l'innocent quand tu me demandais ce que je regardais sur mon téléphone, et surtout d'être complètement fou de toi.",
+      "Bravo, enquêtrice : affaire résolue. Le coupable, c'est moi. Je plaide coupable de tout : d'avoir tout préparé en cachette, d'avoir fait l'innocent quand tu me demandais ce que je regardais sur mon téléphone, et surtout d'être complètement fou de toi.",
       "{nbJours} jours rien que nous deux, des crêpes sur l'eau, une nouvelle année qui commence avec toi et tes mains froides dans mes poches.",
       "J'ai hâte de me perdre là-bas avec toi. Et à minuit, c'est toi que j'embrasse en premier.",
       "Je t'aime."
@@ -339,7 +338,7 @@ const CONFIG = {
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
 body {
   margin: 0;
   min-height: 100dvh;
@@ -363,7 +362,7 @@ html { scrollbar-color: var(--orange) var(--nuit); }
 
 /* Projecteur qui balaie le fond (ambiance polar) */
 .projecteur {
-  position: fixed; inset: -20vmax; z-index: 0; pointer-events: none;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background: radial-gradient(closest-side, rgba(255, 236, 190, .13), transparent 70%) no-repeat;
   background-size: 70vmax 70vmax;
   animation: balayage 14s ease-in-out infinite alternate;
@@ -666,11 +665,11 @@ main {
 .puzzle.resolu .piece:nth-child(9) { border-bottom-right-radius: 14px; }
 
 /* ---------- Étape 5 : message codé ---------- */
-.message-code { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 4px 0 18px; }
-.case-code { width: 34px; display: grid; justify-items: center; gap: 4px; }
-.case-code .symb { font-size: 24px; line-height: 1.2; }
+.message-code { display: flex; justify-content: center; gap: clamp(3px, 1.2vw, 6px); margin: 4px 0 18px; }
+.case-code { flex: 0 1 34px; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 4px; }
+.case-code .symb { font-size: clamp(18px, 6vw, 24px); line-height: 1.2; }
 .case-code .lettre {
-  width: 34px; height: 42px; border-radius: 8px; display: grid; place-items: center;
+  width: 100%; height: 42px; border-radius: 8px; display: grid; place-items: center;
   font-family: var(--titre); font-size: 1.3rem; color: var(--bleu);
   background: #efe6da; border: 2px solid #c8b9a5;
 }
@@ -755,7 +754,7 @@ dialog[open] { animation: ouvre .55s cubic-bezier(.2, .9, .3, 1.25); }
 .final-avant { font-family: var(--machine); font-size: 1.2rem; color: var(--manille); margin: 0; letter-spacing: .2em; text-transform: uppercase; }
 .final-titre {
   font-family: var(--titre); font-weight: 400; margin: 2px 0 8px; line-height: .95;
-  font-size: clamp(2.6rem, 13.5vw, 6rem); color: var(--orange); letter-spacing: -.02em;
+  font-size: clamp(2.2rem, 11vw, 6rem); color: var(--orange); letter-spacing: -.02em;
   text-shadow: 0 4px 0 var(--orange-fonce), 0 10px 26px rgba(0, 0, 0, .35);
   overflow-wrap: anywhere;
 }
@@ -849,16 +848,16 @@ body.fin {
 .sceau svg { width: 30px; height: 30px; }
 .enveloppe-btn:hover .sceau { transform: translate(-50%, -50%) scale(1.08) rotate(-8deg); }
 .enveloppe-btn .lib { position: absolute; left: 0; right: 0; bottom: 12px; color: #6b4a16; font-weight: 600; }
-.lettre {
+#lettre {
   background: var(--papier); color: var(--encre); border-radius: 14px; padding: 26px 22px; text-align: left;
   box-shadow: var(--ombre); font-size: 1.08rem; line-height: 1.6;
   background-image: repeating-linear-gradient(to bottom, transparent 0 calc(1.6em - 1px), rgba(33, 70, 139, .12) calc(1.6em - 1px) 1.6em);
   background-position: 0 26px;
 }
-.lettre.ouvre { animation: lettre .9s cubic-bezier(.2, .9, .3, 1.1) both; }
+#lettre.ouvre { animation: lettre .9s cubic-bezier(.2, .9, .3, 1.1) both; }
 @keyframes lettre { from { transform: translateY(60px) scale(.9); opacity: 0; clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
-.lettre p { margin: 0 0 .8em; max-width: 60ch; }
-.lettre .signature { font-family: var(--titre); color: var(--rose); font-size: 1.5rem; margin: 6px 0 0; }
+#lettre p { margin: 0 0 .8em; max-width: 60ch; }
+#lettre .signature { font-family: var(--titre); color: var(--rose); font-size: 1.5rem; margin: 6px 0 0; }
 .boutons-fin { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 36px 0 10px; }
 
 /* ---------- Horizon néerlandais (se construit au fil des indices) ---------- */
@@ -2172,7 +2171,7 @@ async function lancerFinal() {
 
   const titre = T(CONFIG.final.titre), h1 = $("#final-titre");
   h1.setAttribute("aria-label", titre);
-  h1.innerHTML = [...titre].map((ch, i) => ch === " " ? " " : `<span class="l" aria-hidden="true" style="--i:${i}">${echapper(ch)}</span>`).join("");
+  h1.innerHTML = `<span style="white-space:nowrap">${[...titre].map((ch, i) => ch === " " ? " " : `<span class="l" aria-hidden="true" style="--i:${i}">${echapper(ch)}</span>`).join("")}</span>`;
 
   const voyage = $("#voyage");
   voyage.className = "voyage " + (CONFIG.transport.mode === "avion" ? "avion" : "train");
